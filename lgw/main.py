@@ -23,10 +23,8 @@ def app(args):
 
 
 def main():
-    args = docopt(__doc__, version=__version__)
-    configure_logging(args.get('--verbose'))
-    app(args)
-
-
+  args = docopt(__doc__, version=__version__)
+  configure_logging(args.get('--verbose'))
+  
 if __name__ == '__main__':
     main()
