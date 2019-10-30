@@ -11,16 +11,19 @@ Options:
 '''
 
 from logging import info, debug, error
+from dynaconf import settings
 from docopt import docopt
-from .util import configure_logging
-from . import __version__
+from lgw.util import configure_logging
+from lgw.version import __version__
 
-def app():
+def app(args):
   info('Hello World!')
+  info('Port: %d' % settings.PORT)
 
 def main():
   args = docopt(__doc__, version=__version__)
   configure_logging(args.get('--verbose'))
+  app(args)
 
 if __name__== '__main__':
   main()
