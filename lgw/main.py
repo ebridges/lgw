@@ -17,14 +17,15 @@ from lgw.util import configure_logging
 from lgw.version import __version__
 
 
-def app(args):
+def app():
     info('Hello World!')
-    info('Port: %d' % settings.PORT)
 
 
 def main():
-  args = docopt(__doc__, version=__version__)
-  configure_logging(args.get('--verbose'))
-  
+    args = docopt(__doc__, version=__version__)
+    configure_logging(args.get('--verbose'))
+    app()
+
+
 if __name__ == '__main__':
     main()
