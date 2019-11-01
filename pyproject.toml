@@ -6,8 +6,8 @@ authors = ["Edward Q. Bridges <ebridges@roja.cc>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-dynaconf = "^2.2"
 docopt = "^0.6.2"
+everett = "^1.0"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^19.3b0", allows-prereleases = true}

@@ -2,29 +2,44 @@
 Lambda Gateway.
 
 Usage:
-  lgw deploy-api --config-file=<cfg>
+  lgw deploy-api [--verbose] --config-file=<cfg>
 
 Options:
   -h --help             Show this screen.
   --version             Show version.
+  --verbose             Enable DEBUG-level logging.
   --config-file=<cfg>   Override defaults with these settings.
 '''
 
+from os import path
 from logging import info, debug, error
-from dynaconf import settings
+from everett.manager import ConfigManager, ConfigOSEnv, ConfigEnvFileEnv, ConfigDictEnv
 from docopt import docopt
 from lgw.util import configure_logging
 from lgw.version import __version__
+from lgw import settings
 
 
-def app():
+def app(config):
     info('Hello World!')
+    info('Region: %s' % config('aws_region'))
 
 
 def main():
     args = docopt(__doc__, version=__version__)
     configure_logging(args.get('--verbose'))
-    app()
+    config_file = args.get('--config-file')
+
+    config = ConfigManager(
+        [
+            ConfigOSEnv(),
+            ConfigEnvFileEnv('.env'),
+            ConfigEnvFileEnv(config_file),
+            ConfigDictEnv(settings.defaults()),
+        ]
+    )
+
+    app(config)
 
 
 if __name__ == '__main__':

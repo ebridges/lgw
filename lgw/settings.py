@@ -1,6 +1,2 @@
-
-
-DEFAULT_SETTINGS = 'config/default_settings.py'
-
-def load_settings(user_settings):
-  pass
+def defaults():
+    return {'aws_region': 'eu-west-1'}
