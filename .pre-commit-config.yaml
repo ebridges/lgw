@@ -4,7 +4,9 @@ repos:
     hooks:
     - id: black
       language_version: python3.7
-      args: [--skip-string-normalization]
+      args: [
+            --exclude='(lgw/settings.py)'
+      ]
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.3.0
     hooks:
