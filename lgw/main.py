@@ -18,11 +18,12 @@ from docopt import docopt
 from lgw.util import configure_logging
 from lgw.version import __version__
 from lgw import settings
+from lgw.commands import deploy_api
 
 
-def app(config):
-    info('Hello World!')
-    info('Region: %s' % config('aws_region'))
+def app(args, config):
+    if args.get('deploy-api'):
+        deploy_api(config)
 
 
 def main():
@@ -39,7 +40,7 @@ def main():
         ]
     )
 
-    app(config)
+    app(args, config)
 
 
 if __name__ == '__main__':
