@@ -1,2 +1,4 @@
 def defaults():
-    return {'aws_region': 'eu-west-1'}
+  return {
+    'aws_region': 'eu-west-1',
+  }
