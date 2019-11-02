@@ -15,32 +15,33 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
     :return: URL of API. If error, returns None.
     '''
 
-    api_id = create_api_gateway_account(api_name)
+    api_client = boto3.client('apigateway')
+    lambda_client = boto3.client('lambda')
 
-    root_resource_id = get_root_resource_id(api_id)
+    api_id = create_api_gateway_account(api_client, api_name)
 
-    create_child_resource(api_id, root_resource_id, resource_path)
+    root_resource_id = get_root_resource_id(api_client, api_id)
 
-    create_any_method(api_id, root_resource_id)
+    create_child_resource(api_client, api_id, root_resource_id, resource_path)
 
-    (lambda_arn, lambda_uri, region, account_id) = get_lambda_info(lambda_name)
+    create_any_method(api_client, api_id, root_resource_id)
 
-    link_lambda_with_gateway(api_id, root_resource_id, lambda_uri)
+    (lambda_arn, lambda_uri, region, account_id) = get_lambda_info(lambda_client, lambda_name)
 
-    deploy_to_stage(api_id, deploy_stage)
+    link_lambda_with_gateway(api_client, api_id, root_resource_id, lambda_uri)
 
-    grant_lambda_permission_to_resource(api_id, region, account_id, lambda_name, resource_path)
+    deploy_to_stage(api_client, api_id, deploy_stage)
 
+    grant_lambda_permission_to_resource(lambda_client, api_id, region, account_id, lambda_name, resource_path)
 
     return f'https://{api_id}.execute-api.{region}.amazonaws.com/{deploy_stage}/{resource_path}'
 
 
-def grant_lambda_permission_to_resource(api_id, region, account_id, lambda_name, resource_path):
+def grant_lambda_permission_to_resource(lambda_client, api_id, region, account_id, lambda_name, resource_path):
     '''
         Grant invoke permissions on the Lambda function so it can be called by API Gateway.
         Note: To retrieve the Lambda function's permissions, call `lambda_client.get_policy()`
     '''
-    lambda_client = boto3.client('lambda')
     source_arn = f'arn:aws:execute-api:{region}:{account_id}:{api_id}/*/*/{resource_path}'
     lambda_client.add_permission(
         FunctionName=lambda_name,
@@ -51,18 +52,16 @@ def grant_lambda_permission_to_resource(api_id, region, account_id, lambda_name,
     )
 
 
-def deploy_to_stage(api_id, deploy_stage):
-    api_client = boto3.client('apigateway')
+def deploy_to_stage(api_client, api_id, deploy_stage):
     api_client.create_deployment(restApiId=api_id, stageName=deploy_stage)
 
 
-def link_lambda_with_gateway(api_id, root_resource_id, lambda_uri):
+def link_lambda_with_gateway(api_client, api_id, root_resource_id, lambda_uri):
     '''
         Set the Lambda function as the destination for the ANY method
         Extract the Lambda region and AWS account ID from the Lambda ARN
         ARN format="arn:aws:lambda:REGION:ACCOUNT_ID:function:FUNCTION_NAME"
     '''
-    api_client = boto3.client('apigateway')
     api_client.put_integration(
         restApiId=api_id,
         resourceId=root_resource_id,
@@ -83,9 +82,8 @@ def link_lambda_with_gateway(api_id, root_resource_id, lambda_uri):
     )
 
 
-def get_lambda_info(lambda_name):
-    api_client = boto3.client('lambda')
-    response = api_client.get_function(FunctionName=lambda_name)
+def get_lambda_info(lambda_client, lambda_name):
+    response = lambda_client.get_function(FunctionName=lambda_name)
     lambda_arn = response['Configuration']['FunctionArn']
 
     sections = lambda_arn.split(':')
@@ -100,8 +98,7 @@ def get_lambda_info(lambda_name):
     return lambda_arn, lambda_uri, region, account_id
 
 
-def create_any_method(api_id, root_resource_id):
-    api_client = boto3.client('apigateway')
+def create_any_method(api_client, api_id, root_resource_id):
     api_client.put_method(
         restApiId=api_id, resourceId=root_resource_id, httpMethod='ANY', authorizationType='NONE'
     )
@@ -117,15 +114,13 @@ def create_any_method(api_id, root_resource_id):
     )
 
 
-def create_child_resource(api_id, root_id, resource_path):
-    api_client = boto3.client('apigateway')
+def create_child_resource(api_client, api_id, root_id, resource_path):
     # Define a child resource called /example under the root resource
     result = api_client.create_resource(restApiId=api_id, parentId=root_id, pathPart=resource_path)
     return result['id']
 
 
-def get_root_resource_id(api_id):
-    api_client = boto3.client('apigateway')
+def get_root_resource_id(api_client, api_id):
     result = api_client.get_resources(restApiId=api_id)
 
     root_id = None
@@ -141,9 +136,7 @@ def get_root_resource_id(api_id):
     return root_id
 
 
-def create_api_gateway_account(api_name):
-    api_client = boto3.client('apigateway')
+def create_api_gateway_account(api_client, api_name):
     # Create initial REST API
     result = api_client.create_rest_api(name=api_name)
     api_id = result['id']
-    info(f'Created REST API: {result["name"]}, ID: {api_id}')
