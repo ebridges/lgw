@@ -18,7 +18,7 @@ from docopt import docopt
 from lgw.util import configure_logging
 from lgw.version import __version__
 from lgw import settings
-from lgw.commands import create_rest_api
+from lgw.api_gateway import create_rest_api
 
 
 def app(args, config):
