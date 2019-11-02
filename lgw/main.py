@@ -18,12 +18,17 @@ from docopt import docopt
 from lgw.util import configure_logging
 from lgw.version import __version__
 from lgw import settings
-from lgw.commands import deploy_api
+from lgw.commands import create_rest_api
 
 
 def app(args, config):
     if args.get('deploy-api'):
-        deploy_api(config)
+        create_rest_api(
+          config('aws_api_name'),
+          config('aws_lambda_name'),
+          config('aws_api_resource_path'),
+          config('aws_api_deploy_stage')
+        )
 
 
 def main():
