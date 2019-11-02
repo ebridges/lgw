@@ -1,4 +1,3 @@
-from logging import info
 import boto3
 from botocore.exceptions import ClientError
 
@@ -32,10 +31,8 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
 
     grant_lambda_permission_to_resource(api_id, region, account_id, lambda_name, resource_path)
 
-    api_url = f'https://{api_id}.execute-api.{region}.amazonaws.com/{deploy_stage}/{resource_path}'
-    info(f'API base URL: {api_url}')
 
-    return api_url
+    return f'https://{api_id}.execute-api.{region}.amazonaws.com/{deploy_stage}/{resource_path}'
 
 
 def grant_lambda_permission_to_resource(api_id, region, account_id, lambda_name, resource_path):
