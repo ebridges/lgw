@@ -1,7 +1,7 @@
 from logging import basicConfig, INFO, DEBUG, debug
 
 
-def configure_logging(level):
+def configure_logging(level=None):
     if not level:
         level = INFO
     else:
