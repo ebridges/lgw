@@ -129,7 +129,7 @@ def get_root_resource_id(api_client, api_id):
             root_id = item['id']
 
     if root_id is None:
-        raise Exception(
+        raise ClientError(
             'Could not retrieve the ID of the API root resource using api_id [%s]' % api_id
         )
 
