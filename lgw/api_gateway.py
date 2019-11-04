@@ -53,7 +53,7 @@ def grant_lambda_permission_to_resource(lambda_client, api_id, region, account_i
 
 
 def deploy_to_stage(api_client, api_id, deploy_stage):
-    api_client.create_deployment(restApiId=api_id, stageName=deploy_stage)
+    return api_client.create_deployment(restApiId=api_id, stageName=deploy_stage)
 
 
 def link_lambda_with_gateway(api_client, api_id, root_resource_id, lambda_uri):
@@ -139,4 +139,4 @@ def get_root_resource_id(api_client, api_id):
 def create_api_gateway_account(api_client, api_name):
     # Create initial REST API
     result = api_client.create_rest_api(name=api_name)
-    api_id = result['id']
+    return result['id']
