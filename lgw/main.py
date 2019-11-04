@@ -24,10 +24,10 @@ from lgw.api_gateway import create_rest_api
 def app(args, config):
     if args.get('deploy-api'):
         api_url = create_rest_api(
-          config('aws_api_name'),
-          config('aws_lambda_name'),
-          config('aws_api_resource_path'),
-          config('aws_api_deploy_stage')
+            config('aws_api_name'),
+            config('aws_lambda_name'),
+            config('aws_api_resource_path'),
+            config('aws_api_deploy_stage'),
         )
         info('REST API URL: [%s]' % api_url)
 

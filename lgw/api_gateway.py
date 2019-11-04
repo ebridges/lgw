@@ -32,12 +32,16 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
 
     deploy_to_stage(api_client, api_id, deploy_stage)
 
-    grant_lambda_permission_to_resource(lambda_client, api_id, region, account_id, lambda_name, resource_path)
+    grant_lambda_permission_to_resource(
+        lambda_client, api_id, region, account_id, lambda_name, resource_path
+    )
 
     return f'https://{api_id}.execute-api.{region}.amazonaws.com/{deploy_stage}/{resource_path}'
 
 
-def grant_lambda_permission_to_resource(lambda_client, api_id, region, account_id, lambda_name, resource_path):
+def grant_lambda_permission_to_resource(
+    lambda_client, api_id, region, account_id, lambda_name, resource_path
+):
     '''
         Grant invoke permissions on the Lambda function so it can be called by API Gateway.
         Note: To retrieve the Lambda function's permissions, call `lambda_client.get_policy()`
