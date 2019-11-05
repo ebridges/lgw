@@ -2,7 +2,7 @@ import boto3
 from botocore.exceptions import ClientError
 
 
-def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
+def create_rest_api(api_id, api_name, lambda_name, resource_path, deploy_stage):
     '''
     Creates & deploys a REST API that proxies to a Lambda function, returning the URL
     pointing to this API.
@@ -18,7 +18,8 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
     api_client = boto3.client('apigateway')
     lambda_client = boto3.client('lambda')
 
-    api_id = create_api_gateway_account(api_client, api_name)
+    if not api_id:
+        api_id = create_api_gateway_account(api_client, api_name)
 
     root_resource_id = get_root_resource_id(api_client, api_id)
 
