@@ -22,9 +22,11 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
 
     root_resource_id = get_root_resource_id(api_client, api_id)
 
-    create_child_resource(api_client, api_id, root_resource_id, resource_path)
-
     create_any_method(api_client, api_id, root_resource_id)
+
+    child_resource_id = create_child_resource(api_client, api_id, root_resource_id, resource_path)
+
+    create_any_method(api_client, api_id, child_resource_id)
 
     (lambda_arn, lambda_uri, region, account_id) = get_lambda_info(lambda_client, lambda_name)
 
@@ -138,7 +140,6 @@ def get_root_resource_id(api_client, api_id):
         )
 
     return root_id
-
 
 def create_api_gateway_account(api_client, api_name):
     # Create initial REST API
