@@ -2,7 +2,7 @@
 Lambda Gateway.
 
 Usage:
-  lgw deploy-api [--verbose] --config-file=<cfg>
+  lgw lgw-deploy [--verbose] --config-file=<cfg>
   lgw lambda-deploy [--verbose] --config-file=<cfg> --lambda-file=<zip>
   lgw lambda-invoke [--verbose] --lambda-name=<name> [--payload=<json>]
   lgw lambda-delete [--verbose] --lambda-name=<name>
@@ -91,7 +91,7 @@ def handle_deploy_api_gateway(config):
 
 
 def app(args, config):
-    if args.get('deploy-api'):
+    if args.get('lgw-deploy'):
         return handle_deploy_api_gateway(config)
     if args.get('lambda-deploy'):
         file = path.abspath(args.get('--lambda-file'))
