@@ -1,3 +1,5 @@
+import json
+from logging import info
 import boto3
 from botocore.exceptions import ClientError
 
@@ -18,42 +20,55 @@ def create_rest_api(api_id, api_name, lambda_name, resource_path, deploy_stage):
     api_client = boto3.client('apigateway')
     lambda_client = boto3.client('lambda')
 
-    if not api_id:
-        api_id = create_api_gateway_account(api_client, api_name)
-
-    root_resource_id = get_root_resource_id(api_client, api_id)
-
-    create_any_method(api_client, api_id, root_resource_id)
-
-    child_resource_id = create_child_resource(api_client, api_id, root_resource_id, resource_path)
-
-    create_any_method(api_client, api_id, child_resource_id)
+    api_id = lookup_or_create_api_gateway_account(api_client, api_name)
 
     (lambda_arn, lambda_uri, region, account_id) = get_lambda_info(lambda_client, lambda_name)
 
+    root_resource_id = get_root_resource_id(api_client, api_id)
+    create_any_method(api_client, api_id, root_resource_id)
     link_lambda_with_gateway(api_client, api_id, root_resource_id, lambda_uri)
+
+    child_resource_id = create_child_resource(api_client, api_id, root_resource_id, resource_path)
+    create_any_method(api_client, api_id, child_resource_id)
+    link_lambda_with_gateway(api_client, api_id, child_resource_id, lambda_uri)
 
     deploy_to_stage(api_client, api_id, deploy_stage)
 
     grant_lambda_permission_to_resource(
-        lambda_client, api_id, region, account_id, lambda_name, resource_path
+        lambda_client, api_id, region, account_id, lambda_arn, resource_path
     )
 
     return f'https://{api_id}.execute-api.{region}.amazonaws.com/{deploy_stage}/{resource_path}'
 
 
 def grant_lambda_permission_to_resource(
-    lambda_client, api_id, region, account_id, lambda_name, resource_path
+    lambda_client, api_id, region, account_id, lambda_arn, resource_path
 ):
     '''
-        Grant invoke permissions on the Lambda function so it can be called by API Gateway.
-        Note: To retrieve the Lambda function's permissions, call `lambda_client.get_policy()`
+    Grant invoke permissions on the Lambda function so it can be called by API Gateway.
+    If it exists already then remove so it can be recreated.
     '''
+    lambda_name = lambda_arn.split(':')[6]
+    statement_id = f'{lambda_name}-invoke'
+    action = 'lambda:InvokeFunction'
+
+    policy = lambda_client.get_policy(FunctionName=lambda_arn)
+    if policy and 'Policy' in policy:
+        stmts = json.loads(policy['Policy'])
+        for stmt in stmts['Statement']:
+            if stmt['Action'] == action and stmt['Resource'] == lambda_arn:
+                info(f'removing permission [{statement_id}] for lambda: [{lambda_arn}]')
+                lambda_client.remove_permission(
+                    FunctionName=lambda_arn,
+                    StatementId=statement_id,
+                )
+
+    info(f'adding permission [{statement_id}] for lambda: [{lambda_arn}]')
     source_arn = f'arn:aws:execute-api:{region}:{account_id}:{api_id}/*/*/{resource_path}'
     lambda_client.add_permission(
-        FunctionName=lambda_name,
-        StatementId=f'{lambda_name}-invoke',
-        Action='lambda:InvokeFunction',
+        FunctionName=lambda_arn,
+        StatementId=statement_id,
+        Action=action,
         Principal='apigateway.amazonaws.com',
         SourceArn=source_arn,
     )
@@ -65,9 +80,9 @@ def deploy_to_stage(api_client, api_id, deploy_stage):
 
 def link_lambda_with_gateway(api_client, api_id, root_resource_id, lambda_uri):
     '''
-        Set the Lambda function as the destination for the ANY method
-        Extract the Lambda region and AWS account ID from the Lambda ARN
-        ARN format="arn:aws:lambda:REGION:ACCOUNT_ID:function:FUNCTION_NAME"
+    Set the Lambda function as the destination for the ANY method
+    Extract the Lambda region and AWS account ID from the Lambda ARN
+    ARN format="arn:aws:lambda:REGION:ACCOUNT_ID:function:FUNCTION_NAME"
     '''
     api_client.put_integration(
         restApiId=api_id,
@@ -142,7 +157,12 @@ def get_root_resource_id(api_client, api_id):
 
     return root_id
 
-def create_api_gateway_account(api_client, api_name):
-    # Create initial REST API
+def lookup_or_create_api_gateway_account(api_client, api_name):
+    apis = api_client.get_rest_apis()
+    if 'items' in apis:
+        for api in apis['items']:
+            if api['name'] == api_name:
+                return api['id']
+
     result = api_client.create_rest_api(name=api_name)
     return result['id']
