@@ -28,7 +28,7 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
     create_any_method(api_client, api_id, root_resource_id)
     link_lambda_with_gateway(api_client, api_id, root_resource_id, lambda_uri)
 
-    child_resource_id = create_child_resource(api_client, api_id, root_resource_id, resource_path)
+    child_resource_id = create_resource(api_client, api_id, root_resource_id, resource_path)
     create_any_method(api_client, api_id, child_resource_id)
     link_lambda_with_gateway(api_client, api_id, child_resource_id, lambda_uri)
 
@@ -143,9 +143,16 @@ def create_any_method(api_client, api_id, resource_id):
     )
 
 
-def create_child_resource(api_client, api_id, root_id, resource_path):
-    # Define a child resource called /example under the root resource
-    result = api_client.create_resource(restApiId=api_id, parentId=root_id, pathPart=resource_path)
+def create_resource(api_client, api_id, parent_id, resource_path):
+    resources = api_client.get_resources(restApiId=api_id)
+    if 'items' in resources:
+        for resource in resources['items']:
+            if resource.get('parentId') == parent_id and resource.get('pathPart') == resource_path:
+                info('Found existing resource for %s' % resource['parentId'])
+                return resource['id']
+
+    info(f'No existing resource found for {parent_id}/{resource_path}, creating a new one')
+    result = api_client.create_resource(restApiId=api_id, parentId=parent_id, pathPart=resource_path)
     return result['id']
 
 
