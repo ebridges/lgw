@@ -20,7 +20,7 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
     api_client = boto3.client('apigateway')
     lambda_client = boto3.client('lambda')
 
-    api_id = lookup_or_create_api_gateway_account(api_client, api_name)
+    api_id = lookup_or_create_api_gateway(api_client, api_name)
 
     (lambda_arn, lambda_uri, region, account_id) = get_lambda_info(lambda_client, lambda_name)
 
@@ -171,7 +171,7 @@ def get_root_resource_id(api_client, api_id):
 
     return root_id
 
-def lookup_or_create_api_gateway_account(api_client, api_name):
+def lookup_or_create_api_gateway(api_client, api_name):
     apis = api_client.get_rest_apis()
     if 'items' in apis:
         for api in apis['items']:
