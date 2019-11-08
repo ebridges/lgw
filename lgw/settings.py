@@ -1,7 +1,6 @@
 def defaults():
   return {
     'aws_region': 'us-east-1',
-    'aws_api_id': '',
     'aws_api_name': '',
     'aws_api_resource_path': '{proxy+}',
     'aws_api_deploy_stage': '',
