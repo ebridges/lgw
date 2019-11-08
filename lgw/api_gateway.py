@@ -120,16 +120,23 @@ def get_lambda_info(lambda_client, lambda_name):
     return lambda_arn, lambda_uri, region, account_id
 
 
-def create_any_method(api_client, api_id, root_resource_id):
+def create_any_method(api_client, api_id, resource_id):
+    response = api_client.get_method(restApiId=api_id, resourceId=resource_id, httpMethod='ANY')
+
+    if response and 'httpMethod' in response:
+        info(f'ANY method already exists for resource {resource_id}')
+        return
+
+    info(f'ANY method does not exist for resource {resource_id}, adding it.')
     api_client.put_method(
-        restApiId=api_id, resourceId=root_resource_id, httpMethod='ANY', authorizationType='NONE'
+        restApiId=api_id, resourceId=resource_id, httpMethod='ANY', authorizationType='NONE'
     )
 
     # Set the content-type of the ANY method response to JSON
     content_type = {'application/json': 'Empty'}
     api_client.put_method_response(
         restApiId=api_id,
-        resourceId=root_resource_id,
+        resourceId=resource_id,
         httpMethod='ANY',
         statusCode='200',
         responseModels=content_type,
