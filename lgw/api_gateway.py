@@ -64,7 +64,7 @@ def grant_lambda_permission_to_resource(
                 )
 
     info(f'adding permission [{statement_id}] for lambda: [{lambda_arn}]')
-    source_arn = f'arn:aws:execute-api:{region}:{account_id}:{api_id}/*/*/{resource_path}'
+    source_arn = f'arn:aws:execute-api:{region}:{account_id}:{api_id}/*/*/'
     lambda_client.add_permission(
         FunctionName=lambda_arn,
         StatementId=statement_id,
