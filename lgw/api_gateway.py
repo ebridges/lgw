@@ -20,7 +20,7 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
     api_client = boto3.client('apigateway')
     lambda_client = boto3.client('lambda')
 
-    api_id = lookup_or_create_api_gateway(api_client, api_name)
+    api_id = create_api_gateway(api_client, api_name)
 
     (lambda_arn, lambda_uri, region, account_id) = get_lambda_info(lambda_client, lambda_name)
 
@@ -39,6 +39,11 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
     )
 
     return f'https://{api_id}.execute-api.{region}.amazonaws.com/{deploy_stage}'
+
+
+def delete_rest_api(api_name):
+    api_client = boto3.client('apigateway')
+    delete_api_gateway(api_client, api_name)
 
 
 def grant_lambda_permission_to_resource(
@@ -171,7 +176,24 @@ def get_root_resource_id(api_client, api_id):
 
     return root_id
 
-def lookup_or_create_api_gateway(api_client, api_name):
+
+def delete_api_gateway(api_client, api_name):
+    api_id = lookup_api_gateway(api_client, api_name)
+    if api_id:
+        info(f'Deleting API with ID: {api_id}')
+        api_client.delete_rest_api(restApiId=api_id)
+
+
+def create_api_gateway(api_client, api_name):
+    api_id = lookup_api_gateway(api_client, api_name)
+    if api_id:
+        return api_id
+    info(f'No existing API account found for {api_name}, creating it.')
+    result = api_client.create_rest_api(name=api_name)
+    return result['id']
+
+
+def lookup_api_gateway(api_client, api_name):
     apis = api_client.get_rest_apis()
     if 'items' in apis:
         for api in apis['items']:
