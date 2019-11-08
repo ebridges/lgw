@@ -126,13 +126,14 @@ def get_lambda_info(lambda_client, lambda_name):
 
 
 def create_any_method(api_client, api_id, resource_id):
-    response = api_client.get_method(restApiId=api_id, resourceId=resource_id, httpMethod='ANY')
+    try:
+        response = api_client.get_method(restApiId=api_id, resourceId=resource_id, httpMethod='ANY')
+        if response and response.get('httpMethod'):
+            info(f'ANY method already exists for resource {resource_id}')
+            return
+    except api_client.exceptions.NotFoundException:
+        info(f'ANY method does not exist for resource {resource_id}, adding it.')
 
-    if response and 'httpMethod' in response:
-        info(f'ANY method already exists for resource {resource_id}')
-        return
-
-    info(f'ANY method does not exist for resource {resource_id}, adding it.')
     api_client.put_method(
         restApiId=api_id, resourceId=resource_id, httpMethod='ANY', authorizationType='NONE'
     )
