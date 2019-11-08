@@ -119,7 +119,7 @@ def get_lambda_info(lambda_client, lambda_name):
 
     # Construct the Lambda function's URI
     lambda_uri = (
-        f'arn:aws:apigateway:{region}:lambda:path' f'/2015-03-31/functions/{lambda_arn}/invocations'
+        f'arn:aws:apigateway:{region}:lambda:path/2015-03-31/functions/{lambda_arn}/invocations'
     )
 
     return lambda_arn, lambda_uri, region, account_id
