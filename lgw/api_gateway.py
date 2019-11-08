@@ -176,9 +176,9 @@ def lookup_or_create_api_gateway_account(api_client, api_name):
     if 'items' in apis:
         for api in apis['items']:
             if api['name'] == api_name:
-                info('found existing API account for %s' % api['name'])
+                info('Found existing API account for %s' % api['name'])
                 return api['id']
 
-    info('no existing API account found for %s, creating it.' % api['name'])
+    info(f'No existing API account found for {api_name}, creating it.')
     result = api_client.create_rest_api(name=api_name)
     return result['id']
