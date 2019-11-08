@@ -38,7 +38,7 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
         lambda_client, api_id, region, account_id, lambda_arn, resource_path
     )
 
-    return f'https://{api_id}.execute-api.{region}.amazonaws.com/{deploy_stage}/{resource_path}'
+    return f'https://{api_id}.execute-api.{region}.amazonaws.com/{deploy_stage}'
 
 
 def grant_lambda_permission_to_resource(
