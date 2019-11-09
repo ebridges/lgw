@@ -1,8 +1,8 @@
 def defaults():
   return {
-    'aws_region': 'eu-west-1',
+    'aws_region': 'us-east-1',
     'aws_api_name': '',
-    'aws_api_resource_path': '',
+    'aws_api_resource_path': '{proxy+}',
     'aws_api_deploy_stage': '',
     'aws_lambda_name': '',
     'aws_lambda_description': '',

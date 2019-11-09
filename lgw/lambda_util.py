@@ -254,3 +254,52 @@ def invoke_function(lambda_name):
     )
 
     return res
+
+
+def get_lambda_info(lambda_name):
+    lambda_client = boto3.client('lambda')
+    response = lambda_client.get_function(FunctionName=lambda_name)
+    lambda_arn = response['Configuration']['FunctionArn']
+
+    sections = lambda_arn.split(':')
+    region = sections[3]
+    account_id = sections[4]
+
+    # Construct the Lambda function's URI
+    lambda_uri = (
+        f'arn:aws:apigateway:{region}:lambda:path/2015-03-31/functions/{lambda_arn}/invocations'
+    )
+
+    return lambda_arn, lambda_uri, region, account_id
+
+
+def grant_permission_to_api_resource(api_id, region, account_id, lambda_arn, resource_path):
+    '''
+    Grant invoke permissions on the Lambda function so it can be called by API Gateway.
+    If it exists already then remove so it can be recreated.
+    '''
+    lambda_client = boto3.client('lambda')
+    lambda_name = lambda_arn.split(':')[6]
+    statement_id = f'{lambda_name}-invoke'
+    action = 'lambda:InvokeFunction'
+
+    policy = lambda_client.get_policy(FunctionName=lambda_arn)
+    if policy and 'Policy' in policy:
+        stmts = json.loads(policy['Policy'])
+        for stmt in stmts['Statement']:
+            if stmt['Action'] == action and stmt['Resource'] == lambda_arn:
+                info(f'removing permission [{statement_id}] for lambda: [{lambda_arn}]')
+                lambda_client.remove_permission(
+                    FunctionName=lambda_arn,
+                    StatementId=statement_id,
+                )
+
+    info(f'adding permission [{statement_id}] for lambda: [{lambda_arn}]')
+    source_arn = f'arn:aws:execute-api:{region}:{account_id}:{api_id}/*/*/'
+    lambda_client.add_permission(
+        FunctionName=lambda_arn,
+        StatementId=statement_id,
+        Action=action,
+        Principal='apigateway.amazonaws.com',
+        SourceArn=source_arn,
+    )

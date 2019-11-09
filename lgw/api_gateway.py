@@ -1,6 +1,8 @@
+import json
+from logging import info
 import boto3
 from botocore.exceptions import ClientError
-
+from lgw.lambda_util import get_lambda_info, grant_permission_to_api_resource
 
 def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
     '''
@@ -16,44 +18,29 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
     '''
 
     api_client = boto3.client('apigateway')
-    lambda_client = boto3.client('lambda')
 
-    api_id = create_api_gateway_account(api_client, api_name)
+    api_id = create_api_gateway(api_client, api_name)
+
+    (lambda_arn, lambda_uri, region, account_id) = get_lambda_info(lambda_name)
 
     root_resource_id = get_root_resource_id(api_client, api_id)
-
-    create_child_resource(api_client, api_id, root_resource_id, resource_path)
-
     create_any_method(api_client, api_id, root_resource_id)
-
-    (lambda_arn, lambda_uri, region, account_id) = get_lambda_info(lambda_client, lambda_name)
-
     link_lambda_with_gateway(api_client, api_id, root_resource_id, lambda_uri)
+
+    child_resource_id = create_resource(api_client, api_id, root_resource_id, resource_path)
+    create_any_method(api_client, api_id, child_resource_id)
+    link_lambda_with_gateway(api_client, api_id, child_resource_id, lambda_uri)
 
     deploy_to_stage(api_client, api_id, deploy_stage)
 
-    grant_lambda_permission_to_resource(
-        lambda_client, api_id, region, account_id, lambda_name, resource_path
-    )
+    grant_permission_to_api_resource(api_id, region, account_id, lambda_arn, resource_path)
 
-    return f'https://{api_id}.execute-api.{region}.amazonaws.com/{deploy_stage}/{resource_path}'
+    return f'https://{api_id}.execute-api.{region}.amazonaws.com/{deploy_stage}'
 
 
-def grant_lambda_permission_to_resource(
-    lambda_client, api_id, region, account_id, lambda_name, resource_path
-):
-    '''
-        Grant invoke permissions on the Lambda function so it can be called by API Gateway.
-        Note: To retrieve the Lambda function's permissions, call `lambda_client.get_policy()`
-    '''
-    source_arn = f'arn:aws:execute-api:{region}:{account_id}:{api_id}/*/*/{resource_path}'
-    lambda_client.add_permission(
-        FunctionName=lambda_name,
-        StatementId=f'{lambda_name}-invoke',
-        Action='lambda:InvokeFunction',
-        Principal='apigateway.amazonaws.com',
-        SourceArn=source_arn,
-    )
+def delete_rest_api(api_name):
+    api_client = boto3.client('apigateway')
+    delete_api_gateway(api_client, api_name)
 
 
 def deploy_to_stage(api_client, api_id, deploy_stage):
@@ -62,9 +49,9 @@ def deploy_to_stage(api_client, api_id, deploy_stage):
 
 def link_lambda_with_gateway(api_client, api_id, root_resource_id, lambda_uri):
     '''
-        Set the Lambda function as the destination for the ANY method
-        Extract the Lambda region and AWS account ID from the Lambda ARN
-        ARN format="arn:aws:lambda:REGION:ACCOUNT_ID:function:FUNCTION_NAME"
+    Set the Lambda function as the destination for the ANY method
+    Extract the Lambda region and AWS account ID from the Lambda ARN
+    ARN format="arn:aws:lambda:REGION:ACCOUNT_ID:function:FUNCTION_NAME"
     '''
     api_client.put_integration(
         restApiId=api_id,
@@ -86,41 +73,40 @@ def link_lambda_with_gateway(api_client, api_id, root_resource_id, lambda_uri):
     )
 
 
-def get_lambda_info(lambda_client, lambda_name):
-    response = lambda_client.get_function(FunctionName=lambda_name)
-    lambda_arn = response['Configuration']['FunctionArn']
+def create_any_method(api_client, api_id, resource_id):
+    try:
+        response = api_client.get_method(restApiId=api_id, resourceId=resource_id, httpMethod='ANY')
+        if response and response.get('httpMethod'):
+            info(f'ANY method already exists for resource {resource_id}')
+            return
+    except api_client.exceptions.NotFoundException:
+        info(f'ANY method does not exist for resource {resource_id}, adding it.')
 
-    sections = lambda_arn.split(':')
-    region = sections[3]
-    account_id = sections[4]
-
-    # Construct the Lambda function's URI
-    lambda_uri = (
-        f'arn:aws:apigateway:{region}:lambda:path' f'/2015-03-31/functions/{lambda_arn}/invocations'
-    )
-
-    return lambda_arn, lambda_uri, region, account_id
-
-
-def create_any_method(api_client, api_id, root_resource_id):
     api_client.put_method(
-        restApiId=api_id, resourceId=root_resource_id, httpMethod='ANY', authorizationType='NONE'
+        restApiId=api_id, resourceId=resource_id, httpMethod='ANY', authorizationType='NONE'
     )
 
     # Set the content-type of the ANY method response to JSON
     content_type = {'application/json': 'Empty'}
     api_client.put_method_response(
         restApiId=api_id,
-        resourceId=root_resource_id,
+        resourceId=resource_id,
         httpMethod='ANY',
         statusCode='200',
         responseModels=content_type,
     )
 
 
-def create_child_resource(api_client, api_id, root_id, resource_path):
-    # Define a child resource called /example under the root resource
-    result = api_client.create_resource(restApiId=api_id, parentId=root_id, pathPart=resource_path)
+def create_resource(api_client, api_id, parent_id, resource_path):
+    resources = api_client.get_resources(restApiId=api_id)
+    if 'items' in resources:
+        for resource in resources['items']:
+            if resource.get('parentId') == parent_id and resource.get('pathPart') == resource_path:
+                info('Found existing resource for %s' % resource['parentId'])
+                return resource['id']
+
+    info(f'No existing resource found for {parent_id}/{resource_path}, creating a new one')
+    result = api_client.create_resource(restApiId=api_id, parentId=parent_id, pathPart=resource_path)
     return result['id']
 
 
@@ -140,7 +126,28 @@ def get_root_resource_id(api_client, api_id):
     return root_id
 
 
-def create_api_gateway_account(api_client, api_name):
-    # Create initial REST API
+def delete_api_gateway(api_client, api_name):
+    api_id = lookup_api_gateway(api_client, api_name)
+    if api_id:
+        info(f'Deleting API with ID: {api_id}')
+        api_client.delete_rest_api(restApiId=api_id)
+
+
+def create_api_gateway(api_client, api_name):
+    api_id = lookup_api_gateway(api_client, api_name)
+    if api_id:
+        return api_id
+    info(f'No existing API account found for {api_name}, creating it.')
     result = api_client.create_rest_api(name=api_name)
     return result['id']
+
+
+def lookup_api_gateway(api_client, api_name):
+    apis = api_client.get_rest_apis()
+    if 'items' in apis:
+        for api in apis['items']:
+            if api['name'] == api_name:
+                info('Found existing API account for %s' % api['name'])
+                return api['id']
+    info(f'No API gateway found with name {api_name}')
+    return None

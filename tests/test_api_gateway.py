@@ -9,10 +9,9 @@ from assertpy import assert_that
 
 from lgw.util import configure_logging
 from lgw.api_gateway import (
-    grant_lambda_permission_to_resource,
-    create_api_gateway_account,
+    create_api_gateway,
     get_root_resource_id,
-    create_child_resource,
+    create_resource,
     create_any_method,
     deploy_to_stage,
 )
@@ -47,7 +46,7 @@ def api_client(aws_credentials):
 
 def create_mock_api_gateway(api_client):
     api_name = 'mock_api_name'
-    api_id = create_api_gateway_account(api_client, api_name)
+    api_id = create_api_gateway(api_client, api_name)
     info('api_id [%s]' % api_id)
     return api_id
 
@@ -58,7 +57,7 @@ def create_mock_root_resource(api_client, api_id):
     return root_id
 
 
-def test_create_api_gateway_account(api_client):
+def test_create_api_gateway(api_client):
     api_id = create_mock_api_gateway(api_client)
     assert_that(api_id).is_not_none()
     assert_that(api_id).is_not_empty()
@@ -71,13 +70,13 @@ def test_get_root_resource_id(api_client):
     assert_that(root_resource_id).is_not_empty()
 
 
-def test_create_child_resource(api_client):
+def test_create_resource(api_client):
     api_id = create_mock_api_gateway(api_client)
     root_id = get_root_resource_id(api_client, api_id)
 
     resource_path = 'mock-resource-path'
 
-    actual_resource_id = create_child_resource(api_client, api_id, root_id, resource_path)
+    actual_resource_id = create_resource(api_client, api_id, root_id, resource_path)
 
     info('actual_resource_id: [%s]' % actual_resource_id)
     assert_that(actual_resource_id).is_not_none()
@@ -111,17 +110,16 @@ def test_deploy_to_stage(api_client):
     assert_that(result).is_not_none()
 
 
-def test_get_lambda_info(lambda_client):
-    lambda_name = 'mock_lambda_name'
-    (lambda_arn, lambda_uri, region, account_id) = get_lambda_info(lambda_client, lambda_name)
-
-
 # def test_link_lambda_with_gateway(api_client, api_id, root_resource_id, lambda_uri):
 # 	pass
 
 
 DISABLED = [
     '''
+def test_get_lambda_info(lambda_client):
+    lambda_name = 'mock_lambda_name'
+    (lambda_arn, lambda_uri, region, account_id) = get_lambda_info(lambda_client, lambda_name)
+
 def test_grant_lambda_permission_to_resource(lambda_client):
   api_id = 'a1b2c3d4e5'
   region = DEFAULT_REGION
