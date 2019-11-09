@@ -2,7 +2,7 @@ import json
 from logging import info
 import boto3
 from botocore.exceptions import ClientError
-
+from lgw.lambda_util import get_lambda_info, grant_permission_to_api_resource
 
 def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
     '''
@@ -18,11 +18,10 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
     '''
 
     api_client = boto3.client('apigateway')
-    lambda_client = boto3.client('lambda')
 
     api_id = create_api_gateway(api_client, api_name)
 
-    (lambda_arn, lambda_uri, region, account_id) = get_lambda_info(lambda_client, lambda_name)
+    (lambda_arn, lambda_uri, region, account_id) = get_lambda_info(lambda_name)
 
     root_resource_id = get_root_resource_id(api_client, api_id)
     create_any_method(api_client, api_id, root_resource_id)
@@ -34,9 +33,7 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
 
     deploy_to_stage(api_client, api_id, deploy_stage)
 
-    grant_lambda_permission_to_resource(
-        lambda_client, api_id, region, account_id, lambda_arn, resource_path
-    )
+    grant_permission_to_api_resource(api_id, region, account_id, lambda_arn, resource_path)
 
     return f'https://{api_id}.execute-api.{region}.amazonaws.com/{deploy_stage}'
 
@@ -44,39 +41,6 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
 def delete_rest_api(api_name):
     api_client = boto3.client('apigateway')
     delete_api_gateway(api_client, api_name)
-
-
-def grant_lambda_permission_to_resource(
-    lambda_client, api_id, region, account_id, lambda_arn, resource_path
-):
-    '''
-    Grant invoke permissions on the Lambda function so it can be called by API Gateway.
-    If it exists already then remove so it can be recreated.
-    '''
-    lambda_name = lambda_arn.split(':')[6]
-    statement_id = f'{lambda_name}-invoke'
-    action = 'lambda:InvokeFunction'
-
-    policy = lambda_client.get_policy(FunctionName=lambda_arn)
-    if policy and 'Policy' in policy:
-        stmts = json.loads(policy['Policy'])
-        for stmt in stmts['Statement']:
-            if stmt['Action'] == action and stmt['Resource'] == lambda_arn:
-                info(f'removing permission [{statement_id}] for lambda: [{lambda_arn}]')
-                lambda_client.remove_permission(
-                    FunctionName=lambda_arn,
-                    StatementId=statement_id,
-                )
-
-    info(f'adding permission [{statement_id}] for lambda: [{lambda_arn}]')
-    source_arn = f'arn:aws:execute-api:{region}:{account_id}:{api_id}/*/*/'
-    lambda_client.add_permission(
-        FunctionName=lambda_arn,
-        StatementId=statement_id,
-        Action=action,
-        Principal='apigateway.amazonaws.com',
-        SourceArn=source_arn,
-    )
 
 
 def deploy_to_stage(api_client, api_id, deploy_stage):
@@ -107,22 +71,6 @@ def link_lambda_with_gateway(api_client, api_id, root_resource_id, lambda_uri):
         statusCode='200',
         responseTemplates=content_type,
     )
-
-
-def get_lambda_info(lambda_client, lambda_name):
-    response = lambda_client.get_function(FunctionName=lambda_name)
-    lambda_arn = response['Configuration']['FunctionArn']
-
-    sections = lambda_arn.split(':')
-    region = sections[3]
-    account_id = sections[4]
-
-    # Construct the Lambda function's URI
-    lambda_uri = (
-        f'arn:aws:apigateway:{region}:lambda:path/2015-03-31/functions/{lambda_arn}/invocations'
-    )
-
-    return lambda_arn, lambda_uri, region, account_id
 
 
 def create_any_method(api_client, api_id, resource_id):
