@@ -304,7 +304,7 @@ def grant_permission_to_api_resource(api_id, region, account_id, lambda_arn, res
                     info(f'No permission found for StatementId: {statement_id}, FunctionName: {lambda_arn}')
 
     info(f'adding permission [{statement_id}] for lambda: [{lambda_arn}]')
-    source_arn = f'arn:aws:execute-api:{region}:{account_id}:{api_id}/*/*/'
+    source_arn = f'arn:aws:execute-api:{region}:{account_id}:{api_id}/*/*/*/'
     lambda_client.add_permission(
         FunctionName=lambda_arn,
         StatementId=statement_id,
