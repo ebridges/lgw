@@ -10,7 +10,7 @@ def update_dns_a_record(domain_name, alias_target_dns_name):
     '''
     r53_client = boto3.client('route53')
 
-    zone_id = get_hosted_zone_id_for_domain(r53_client)
+    zone_id = get_hosted_zone_id_for_domain(r53_client, domain_name)
     record_set = {
         'Name': domain_name,
         'Type': 'A',
