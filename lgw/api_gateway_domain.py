@@ -5,18 +5,19 @@ from lgw.route53 import update_dns_a_record
 from lgw.acm import wait_for_certificate_validation
 
 
-def add_domain_mapping(api_name, domain_name, base_path, https_certificate_arn, deploy_stage, wait_for_domain):
+def add_domain_mapping(api_name, domain_name, base_path, https_certificate_arn, deploy_stage, wait_for_completion):
     api_client = boto3.client('apigateway')
 
     api_id = lookup_api_gateway(api_client, api_name)
 
     created = create_domain_name(api_client, domain_name, https_certificate_arn)
-    if wait_for_domain:
+    if wait_for_completion:
       while True:
         created = create_domain_name(api_client, domain_name, https_certificate_arn)
         if created:
           break;
-        wait_for_certificate_validation(https_certificate_arn, wait_for_domain)
+    if wait_for_completion:
+      wait_for_certificate_validation(https_certificate_arn, wait_for_completion)
 
     if created:
       debug(f'Adding base path mapping for {deploy_stage}')
