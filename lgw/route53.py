@@ -36,6 +36,15 @@ def update_dns_a_record(domain_name, alias_target_dns_name):
     if response:
         change_info = response.get('ChangeInfo')
         info('Resource record change submitted: status of change is: [%s]' % change_info['Status'])
+        if change_info['Status'] == 'PENDING':
+            waiter = r53_client.get_waiter('resource_record_sets_changed')
+            waiter.wait(
+                Id=change_info['Id'],
+                WaiterConfig={
+                    'Delay': 30,
+                    'MaxAttempts': 60
+                }
+            )
         return change_info['Id']
     else:
         warn('Empty response returned from record change submission.')
