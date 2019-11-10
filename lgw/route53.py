@@ -45,29 +45,22 @@ def update_dns_a_record(domain_name, alias_target_dns_name):
 
 def get_hosted_zone_id_for_domain(route53_client, domain_name):
     '''
-    List public host zones, while transparently handling pagination.
+    List public zones -- more robust implementation linked below that considers
+    - larger number of hosted zones
+    - more diverse pool of domain names
+    - non-public hosted zones
     cf.: https://github.com/Miserlou/Zappa/blob/master/zappa/core.py#L3087
     '''
-    public_zones = list_public_hosted_zones(route53_client)
+    public_zones = []
 
-    zones = {zone['Name'][:-1]: zone['Id'] for zone in public_zones if zone['Name'][:-1] in domain_name}
-    if zones:
-        keys = max(zones.keys(), key=lambda a: len(a))  # get longest key -- best match.
-        return zones[keys]
-    else:
-        return None
+    zones = route53_client.list_hosted_zones(MaxItems='25')
 
+    for hosted_zone in zones['HostedZones']:
+        if not hosted_zone['Config']['PrivateZone']:
+            public_zones += zones['HostedZones']
 
-def list_public_hosted_zones(route53_client):
-    public_zones = {'HostedZones': []}
+    for zone in public_zones:
+        if zone['Name'][:-1] == domain_name:
+            return zone['Id']
 
-    new_zones = route53_client.list_hosted_zones(MaxItems='100')
-    while new_zones['IsTruncated']:
-        if not new_zones['Config']['PrivateZone']:
-            public_zones['HostedZones'] += new_zones['HostedZones']
-        new_zones = route53_client.list_hosted_zones(Marker=new_zones['NextMarker'], MaxItems='100')
-
-    if not new_zones['Config']['PrivateZone']:
-        public_zones['HostedZones'] += new_zones['HostedZones']
-
-    return public_zones
+    return None
