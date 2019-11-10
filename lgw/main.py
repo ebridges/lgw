@@ -108,6 +108,7 @@ def handle_add_domain(config):
         config('aws_api_domain_wait_until_available'),
     )
     info('Domain name %s mapped to path %s' % (config('aws_api_domain_name'), config('aws_api_base_path')))
+    info('HTTPS certificate validation may be pending.  Check here for status: https://console.aws.amazon.com/apigateway/home?region=us-east-1#/custom-domain-names')
     return 1
 
 def handle_remove_domain(config):
