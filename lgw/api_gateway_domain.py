@@ -20,7 +20,7 @@ def add_domain_mapping(api_name, domain_name, base_path, https_certificate_arn, 
       debug(f'Adding base path mapping for {deploy_stage}')
       configure_base_path_mapping(api_client, api_id, domain_name, deploy_stage, base_path)
 
-      cf_distribution = created.get('cloudfront_distribution')
+      cf_distribution = created['distributionDomainName']
       debug(f'Updating A record for {domain_name} with CF distribution {cf_distribution}')
       update_dns_a_record(domain_name, cf_distribution)
 
