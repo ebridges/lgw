@@ -61,7 +61,7 @@ def configure_base_path_mapping(api_client, api_id, domain_name, deploy_stage, b
       stage=deploy_stage,
     )
 
-    if response['ResponseMetaData']['HTTPStatusCode'] == 201:
+    if response['ResponseMetadata']['HTTPStatusCode'] == 201:
       info(f'Base path mapping created for {domain_name}:{base_path}')
     else:
       warn(f'Unable to create base path mapping for {domain_name}:{base_path}')
