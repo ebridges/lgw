@@ -4,6 +4,7 @@ def defaults():
     'aws_api_name': '',
     'aws_api_resource_path': '{proxy+}',
     'aws_api_deploy_stage': '',
+    'aws_api_lambda_integration_role': '',
     'aws_api_domain_name': '',
     'aws_api_base_path': '(none)',
     'aws_api_domain_wait_until_available': 40, # minutes

@@ -88,6 +88,7 @@ def handle_deploy_api_gateway(config):
         config('aws_lambda_name'),
         config('aws_api_resource_path'),
         config('aws_api_deploy_stage'),
+        config('aws_api_lambda_integration_role'),
     )
     print(api_url)
     info('REST API URL: [%s]' % api_url)

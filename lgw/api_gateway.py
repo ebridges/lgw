@@ -4,7 +4,8 @@ import boto3
 from botocore.exceptions import ClientError
 from lgw.lambda_util import get_lambda_info, grant_permission_to_api_resource
 
-def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
+
+def create_rest_api(api_name, lambda_name, resource_path, deploy_stage, integration_role):
     '''
     Creates & deploys a REST API that proxies to a Lambda function, returning the URL
     pointing to this API.
@@ -25,15 +26,15 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
 
     root_resource_id = get_root_resource_id(api_client, api_id)
     create_method(api_client, api_id, root_resource_id, 'ANY')
-    create_lambda_integration(api_client, api_id, root_resource_id, lambda_uri)
+    create_lambda_integration(api_client, api_id, root_resource_id, lambda_uri, integration_role)
 
     child_resource_id = create_resource(api_client, api_id, root_resource_id, resource_path)
     create_method(api_client, api_id, child_resource_id, 'ANY')
-    create_lambda_integration(api_client, api_id, child_resource_id, lambda_uri)
+    create_lambda_integration(api_client, api_id, child_resource_id, lambda_uri, integration_role)
 
     deploy_to_stage(api_client, api_id, deploy_stage)
 
-    grant_permission_to_api_resource(api_id, region, account_id, lambda_arn, resource_path)
+    # grant_permission_to_api_resource(api_id, region, account_id, lambda_arn, resource_path)
 
     return f'https://{api_id}.execute-api.{region}.amazonaws.com/{deploy_stage}'
 
@@ -60,6 +61,7 @@ def create_lambda_integration(api_client, api_id, root_resource_id, lambda_uri, 
         type='AWS_PROXY',
         integrationHttpMethod='POST',
         uri=lambda_uri,
+        credentials=role_arn,
     )
 
 
