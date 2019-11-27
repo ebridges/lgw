@@ -104,11 +104,6 @@ def test_create_method(api_client):
     assert_that(method_response).has_statusCode('200')
 
 
-def test_deploy_to_stage(api_client):
-    api_id = create_mock_api_gateway(api_client)
-    deploy_stage = 'mock_deploy_stage'
-    result = deploy_to_stage(api_client, api_id, deploy_stage)
-    assert_that(result).is_not_none()
 
 
 # def test_link_lambda_with_gateway(api_client, api_id, root_resource_id, lambda_uri):
@@ -117,6 +112,17 @@ def test_deploy_to_stage(api_client):
 
 DISABLED = [
     '''
+def test_deploy_to_stage(api_client, sts_client):
+    account_id = sts_client.get_caller_identity().get('Account')
+    api_id = create_mock_api_gateway(api_client)
+    root_id = get_root_resource_id(api_client, api_id)
+    create_method(api_client, api_id, root_id, 'GET')
+
+    deploy_stage = 'mock_deploy_stage'
+    result = deploy_to_stage(api_client, api_id, deploy_stage)
+    assert_that(result).is_not_none()
+
+
 def test_get_lambda_info(lambda_client):
     lambda_name = 'mock_lambda_name'
     (lambda_arn, lambda_uri, region, account_id) = get_lambda_info(lambda_client, lambda_name)
