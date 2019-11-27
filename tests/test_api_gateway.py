@@ -12,8 +12,9 @@ from lgw.api_gateway import (
     create_api_gateway,
     get_root_resource_id,
     create_resource,
-    create_any_method,
     deploy_to_stage,
+    create_method,
+    create_lambda_integration,
 )
 
 configure_logging()
@@ -83,20 +84,20 @@ def test_create_resource(api_client):
     assert_that(actual_resource_id).is_not_empty()
 
 
-def test_create_any_method(api_client):
+def test_create_method(api_client):
     api_id = create_mock_api_gateway(api_client)
     root_id = get_root_resource_id(api_client, api_id)
 
-    create_any_method(api_client, api_id, root_id)
+    create_method(api_client, api_id, root_id, 'GET')
 
-    method = api_client.get_method(restApiId=api_id, resourceId=root_id, httpMethod='ANY')
+    method = api_client.get_method(restApiId=api_id, resourceId=root_id, httpMethod='GET')
 
     assert_that(method).is_not_none()
     assert_that(method).contains('httpMethod')
-    assert_that(method).has_httpMethod('ANY')
+    assert_that(method).has_httpMethod('GET')
 
     method_response = api_client.get_method_response(
-        restApiId=api_id, resourceId=root_id, httpMethod='ANY', statusCode='200'
+        restApiId=api_id, resourceId=root_id, httpMethod='GET', statusCode='200'
     )
 
     assert_that(method_response).contains('statusCode')
