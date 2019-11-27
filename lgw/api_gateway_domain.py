@@ -9,10 +9,10 @@ def add_domain_mapping(api_name, domain_name, base_path, https_certificate_arn, 
 
     api_id = lookup_api_gateway(api_client, api_name)
 
-    created = create_domain_name(api_client, domain_name, https_certificate_arn)
+    created = create_custom_domain_name(api_client, domain_name, https_certificate_arn)
     if wait_for_completion:
       while True:
-        created = create_domain_name(api_client, domain_name, https_certificate_arn)
+        created = create_custom_domain_name(api_client, domain_name, https_certificate_arn)
         if created:
           break;
 
@@ -64,7 +64,7 @@ def configure_base_path_mapping(api_client, api_id, domain_name, deploy_stage, b
       warn(f'Unable to create base path mapping for {domain_name}:{base_path}')
 
 
-def create_domain_name(api_client, domain_name, certificate_arn):
+def create_custom_domain_name(api_client, domain_name, certificate_arn):
     response = None
     try:
       response = api_client.get_domain_name(domainName=domain_name)
