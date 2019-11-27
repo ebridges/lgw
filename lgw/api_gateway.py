@@ -11,7 +11,7 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
 
     :param api_name: Name of the REST API
     :param lambda_name: Name of an existing Lambda function
-    :param resource_path: The resource path that pointsto the lambda.
+    :param resource_path: The resource path that points to the lambda.
     :param deploy_stage: The name of the deployment stage.
 
     :return: URL of API. If error, returns None.
