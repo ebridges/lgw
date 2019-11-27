@@ -57,20 +57,11 @@ def create_lambda_integration(api_client, api_id, root_resource_id, lambda_uri, 
         restApiId=api_id,
         resourceId=root_resource_id,
         httpMethod='ANY',
-        type='AWS',
+        type='AWS_PROXY',
         integrationHttpMethod='POST',
         uri=lambda_uri,
     )
 
-    # Set the content-type of the Lambda function to JSON
-    content_type = {'application/json': ''}
-    api_client.put_integration_response(
-        restApiId=api_id,
-        resourceId=root_resource_id,
-        httpMethod='ANY',
-        statusCode='200',
-        responseTemplates=content_type,
-    )
 
 def create_method(api_client, api_id, resource_id, http_method):
     try:
