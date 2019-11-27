@@ -4,6 +4,8 @@ Lambda Gateway.
 Usage:
   lgw lgw-deploy [--verbose] --config-file=<cfg>
   lgw lgw-undeploy [--verbose] --config-file=<cfg>
+  lgw add-domain [--verbose] --config-file=<cfg>
+  lgw remove-domain [--verbose] --config-file=<cfg>
   lgw lambda-deploy [--verbose] --config-file=<cfg> --lambda-file=<zip>
   lgw lambda-invoke [--verbose] --lambda-name=<name> [--payload=<json>]
   lgw lambda-delete [--verbose] --lambda-name=<name>
@@ -27,6 +29,7 @@ from lgw.util import configure_logging
 from lgw.version import __version__
 from lgw import settings
 from lgw.api_gateway import create_rest_api, delete_rest_api
+from lgw.api_gateway_domain import add_domain_mapping, remove_domain_mapping
 from lgw.lambda_util import deploy_function, invoke_function, delete_function
 
 
@@ -85,6 +88,7 @@ def handle_deploy_api_gateway(config):
         config('aws_lambda_name'),
         config('aws_api_resource_path'),
         config('aws_api_deploy_stage'),
+        config('aws_api_lambda_integration_role'),
     )
     print(api_url)
     info('REST API URL: [%s]' % api_url)
@@ -95,12 +99,38 @@ def handle_undeploy_api_gateway(config):
     info('API Gateway %s deleted.' % config('aws_api_name'))
     return 1
 
+def handle_add_domain(config):
+    add_domain_mapping(
+        config('aws_api_name'),
+        config('aws_api_domain_name'),
+        config('aws_api_base_path'),
+        config('aws_acm_certificate_arn'),
+        config('aws_api_deploy_stage'),
+        config('aws_api_domain_wait_until_available'),
+    )
+    info('Domain name %s mapped to path %s' % (config('aws_api_domain_name'), config('aws_api_base_path')))
+    info('HTTPS certificate validation may be pending.  Check here for status: https://console.aws.amazon.com/apigateway/home?region=us-east-1#/custom-domain-names')
+    return 1
+
+def handle_remove_domain(config):
+    remove_domain_mapping(
+        config('aws_api_name'),
+        config('aws_api_domain_name'),
+        config('aws_api_base_path'),
+    )
+    info('Domain name %s unmapped from API %s' % (config('aws_api_domain_name'), config('aws_api_name')))
+    return 1
+
 
 def app(args, config):
     if args.get('lgw-deploy'):
         return handle_deploy_api_gateway(config)
     if args.get('lgw-undeploy'):
         return handle_undeploy_api_gateway(config)
+    if args.get('add-domain'):
+        return handle_add_domain(config)
+    if args.get('remove-domain'):
+        return handle_remove_domain(config)
     if args.get('lambda-deploy'):
         file = path.abspath(args.get('--lambda-file'))
         return handle_deploy_lambda(file, config)

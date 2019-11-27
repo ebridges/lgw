@@ -283,19 +283,28 @@ def grant_permission_to_api_resource(api_id, region, account_id, lambda_arn, res
     statement_id = f'{lambda_name}-invoke'
     action = 'lambda:InvokeFunction'
 
-    policy = lambda_client.get_policy(FunctionName=lambda_arn)
+    info(f'Loading policies related to lambda: {lambda_arn}')
+    policy = None
+    try:
+        policy = lambda_client.get_policy(FunctionName=lambda_arn)
+    except lambda_client.exceptions.ResourceNotFoundException:
+        info(f'No policy associated with {lambda_arn}')
+
     if policy and 'Policy' in policy:
         stmts = json.loads(policy['Policy'])
         for stmt in stmts['Statement']:
             if stmt['Action'] == action and stmt['Resource'] == lambda_arn:
                 info(f'removing permission [{statement_id}] for lambda: [{lambda_arn}]')
-                lambda_client.remove_permission(
-                    FunctionName=lambda_arn,
-                    StatementId=statement_id,
-                )
+                try:
+                    lambda_client.remove_permission(
+                        FunctionName=lambda_arn,
+                        StatementId=statement_id,
+                    )
+                except lambda_client.exceptions.ResourceNotFoundException:
+                    info(f'No permission found for StatementId: {statement_id}, FunctionName: {lambda_arn}')
 
     info(f'adding permission [{statement_id}] for lambda: [{lambda_arn}]')
-    source_arn = f'arn:aws:execute-api:{region}:{account_id}:{api_id}/*/*/'
+    source_arn = f'arn:aws:execute-api:{region}:{account_id}:{api_id}/*/*/*/'
     lambda_client.add_permission(
         FunctionName=lambda_arn,
         StatementId=statement_id,
