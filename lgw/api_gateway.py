@@ -24,12 +24,12 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage):
     (lambda_arn, lambda_uri, region, account_id) = get_lambda_info(lambda_name)
 
     root_resource_id = get_root_resource_id(api_client, api_id)
-    create_any_method(api_client, api_id, root_resource_id)
-    link_lambda_with_gateway(api_client, api_id, root_resource_id, lambda_uri)
+    create_method(api_client, api_id, root_resource_id, 'ANY')
+    create_lambda_integration(api_client, api_id, root_resource_id, lambda_uri)
 
     child_resource_id = create_resource(api_client, api_id, root_resource_id, resource_path)
-    create_any_method(api_client, api_id, child_resource_id)
-    link_lambda_with_gateway(api_client, api_id, child_resource_id, lambda_uri)
+    create_method(api_client, api_id, child_resource_id, 'ANY')
+    create_lambda_integration(api_client, api_id, child_resource_id, lambda_uri)
 
     deploy_to_stage(api_client, api_id, deploy_stage)
 
@@ -47,7 +47,7 @@ def deploy_to_stage(api_client, api_id, deploy_stage):
     return api_client.create_deployment(restApiId=api_id, stageName=deploy_stage)
 
 
-def link_lambda_with_gateway(api_client, api_id, root_resource_id, lambda_uri):
+def create_lambda_integration(api_client, api_id, root_resource_id, lambda_uri, role_arn=None):
     '''
     Set the Lambda function as the destination for the ANY method
     Extract the Lambda region and AWS account ID from the Lambda ARN
@@ -72,26 +72,28 @@ def link_lambda_with_gateway(api_client, api_id, root_resource_id, lambda_uri):
         responseTemplates=content_type,
     )
 
-
-def create_any_method(api_client, api_id, resource_id):
+def create_method(api_client, api_id, resource_id, http_method):
     try:
-        response = api_client.get_method(restApiId=api_id, resourceId=resource_id, httpMethod='ANY')
+        response = api_client.get_method(restApiId=api_id, resourceId=resource_id, httpMethod=http_method)
         if response and response.get('httpMethod'):
-            info(f'ANY method already exists for resource {resource_id}')
+            info(f'{http_method} method already exists for resource {resource_id}')
             return
     except api_client.exceptions.NotFoundException:
-        info(f'ANY method does not exist for resource {resource_id}, adding it.')
+        info(f'{http_method} method does not exist for resource {resource_id}, adding it.')
 
     api_client.put_method(
-        restApiId=api_id, resourceId=resource_id, httpMethod='ANY', authorizationType='NONE'
+        resourceId=resource_id,
+        restApiId=api_id,
+        httpMethod=http_method,
+        authorizationType='NONE',
     )
 
-    # Set the content-type of the ANY method response to JSON
+    # Set the content-type of the method response to JSON
     content_type = {'application/json': 'Empty'}
     api_client.put_method_response(
         restApiId=api_id,
         resourceId=resource_id,
-        httpMethod='ANY',
+        httpMethod=http_method,
         statusCode='200',
         responseModels=content_type,
     )
