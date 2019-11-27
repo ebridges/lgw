@@ -7,7 +7,7 @@ def defaults():
     'aws_api_lambda_integration_role': '',
     'aws_api_domain_name': '',
     'aws_api_base_path': '(none)',
-    'aws_api_domain_wait_until_available': 40, # minutes
+    'aws_api_domain_wait_until_available': 'true',
     'aws_acm_certificate_arn': '',
     'aws_lambda_name': '',
     'aws_lambda_description': '',
