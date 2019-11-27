@@ -66,7 +66,7 @@ def test_create_api_gateway(api_client):
 
 def test_get_root_resource_id(api_client):
     api_id = create_mock_api_gateway(api_client)
-    root_resource_id = create_mock_root_resource()
+    root_resource_id = create_mock_root_resource(api_client, api_id)
     assert_that(root_resource_id).is_not_none()
     assert_that(root_resource_id).is_not_empty()
 
