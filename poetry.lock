@@ -430,6 +430,7 @@ xmltodict = "*"
 reference = "502957f1f9560cb6dff75271e6812498f4ff7bba"
 type = "git"
 url = "https://github.com/spulec/moto.git"
+
 [[package]]
 category = "dev"
 description = "Node.js virtual environment builder"
@@ -752,7 +753,7 @@ version = "0.6.0"
 more-itertools = "*"
 
 [metadata]
-content-hash = "175b233f4cc6456789868eb643eb146c66b217e54f3e2aad41d7cf4e081e3a40"
+content-hash = "5f63366bdbb6b113bcd24eb96a2ec840832986e8c962e5ca68118aa8c7f9e549"
 python-versions = "^3.7"
 
 [metadata.hashes]
