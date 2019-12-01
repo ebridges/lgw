@@ -1,16 +1,43 @@
 [tool.poetry]
 name = "lgw"
-version = "0.1.0"
-description = "Lambda Gateway"
+version = "1.0.0.post1"
+description = "Configure an AWS Gateway in front of a Lambda function."
 authors = ["Edward Q. Bridges <ebridges@roja.cc>"]
+license = "Apache-2.0"
+readme = "README.md"
+homepage = "https://github.com/ebridges/lgw"
+documentation = "https://github.com/ebridges/lgw/blob/master/README.md"
+classifiers = ["Topic :: Software Development :: Build Tools"]
+exclude = ["tests", "vscode.env", "NOTES.md"]
+
 
 [tool.poetry.dependencies]
 python = "^3.7"
-dynaconf = "^2.2"
+docopt = "^0.6.2"
+everett = "^1.0"
+boto3 = "^1.10"
+docker = "^4.1"
 
 [tool.poetry.dev-dependencies]
+black = {version = "^19.3b0", allows-prereleases = true}
 pytest = "^3.0"
+pre-commit = "^1.20"
+moto = { git = "https://github.com/spulec/moto.git", branch = "master" }
+assertpy = "^0.15.0"
+
+[tool.poetry.scripts]
+lgw = 'lgw.main:main'
+
+[tool.black]
+line-length = 100
+skip-string-normalization = true
+target-version = ['py37']
+exclude = '(lgw/settings.py)'
 
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+[tool.dephell.main]
+from = {format = "poetry", path = "pyproject.toml"}
+to = {format = "setuppy", path = "setup.py"}
