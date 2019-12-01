@@ -326,3 +326,22 @@ Default installed by this script:
 </td>
 </tr>
 </table>
+
+
+## Releasing
+
+```
+git flow release start x.y.z
+# bump version
+vi pyproject.toml lgw/version.py
+git add pyproject.toml lgw/version.py
+git commit -m 'bump version'
+dephell deps convert
+poetry publish --build
+```
+
+## Info
+
+[![GitHub watchers](https://img.shields.io/github/watchers/badges/shields.svg?style=social&label=Watch&style=flat-square)]()
+[![PyPi License](https://img.shields.io/pypi/l/lgw?color=blue)]()
+[![PyPi](https://img.shields.io/pypi/v/lgw.svg?style=flat-square)]()
