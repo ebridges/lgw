@@ -67,7 +67,9 @@ def create_lambda_integration(api_client, api_id, root_resource_id, lambda_uri, 
 
 def create_method(api_client, api_id, resource_id, http_method):
     try:
-        response = api_client.get_method(restApiId=api_id, resourceId=resource_id, httpMethod=http_method)
+        response = api_client.get_method(
+            restApiId=api_id, resourceId=resource_id, httpMethod=http_method
+        )
         if response and response.get('httpMethod'):
             info(f'{http_method} method already exists for resource {resource_id}')
             return
@@ -75,10 +77,7 @@ def create_method(api_client, api_id, resource_id, http_method):
         info(f'{http_method} method does not exist for resource {resource_id}, adding it.')
 
     api_client.put_method(
-        resourceId=resource_id,
-        restApiId=api_id,
-        httpMethod=http_method,
-        authorizationType='NONE',
+        resourceId=resource_id, restApiId=api_id, httpMethod=http_method, authorizationType='NONE'
     )
 
     # Set the content-type of the method response to JSON
@@ -101,7 +100,9 @@ def create_resource(api_client, api_id, parent_id, resource_path):
                 return resource['id']
 
     info(f'No existing resource found for {parent_id}/{resource_path}, creating a new one')
-    result = api_client.create_resource(restApiId=api_id, parentId=parent_id, pathPart=resource_path)
+    result = api_client.create_resource(
+        restApiId=api_id, parentId=parent_id, pathPart=resource_path
+    )
     return result['id']
 
 

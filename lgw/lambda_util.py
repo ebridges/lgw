@@ -223,18 +223,19 @@ def invoke_function(lambda_name, payload):
     invocation_type = 'RequestResponse'  # or 'Event', or 'DryRun'
 
     with open(payload, 'r') as file:
-      input_payload = bytearray(file)
+        input_payload = bytearray(file)
 
-      lambda_client = boto3.client('lambda')
+        lambda_client = boto3.client('lambda')
 
-      res = lambda_client.invoke(
-          FunctionName=lambda_name,
-          InvocationType=invocation_type,
-          LogType=log_type,
-          Payload=input_payload,
-      )
+        res = lambda_client.invoke(
+            FunctionName=lambda_name,
+            InvocationType=invocation_type,
+            LogType=log_type,
+            Payload=input_payload,
+        )
 
     return res
+
 
 def invoke_function(lambda_name):
     '''
@@ -248,9 +249,7 @@ def invoke_function(lambda_name):
 
     lambda_client = boto3.client('lambda')
     res = lambda_client.invoke(
-        FunctionName=lambda_name,
-        InvocationType=invocation_type,
-        LogType=log_type,
+        FunctionName=lambda_name, InvocationType=invocation_type, LogType=log_type
     )
 
     return res
@@ -297,11 +296,12 @@ def grant_permission_to_api_resource(api_id, region, account_id, lambda_arn, res
                 info(f'removing permission [{statement_id}] for lambda: [{lambda_arn}]')
                 try:
                     lambda_client.remove_permission(
-                        FunctionName=lambda_arn,
-                        StatementId=statement_id,
+                        FunctionName=lambda_arn, StatementId=statement_id
                     )
                 except lambda_client.exceptions.ResourceNotFoundException:
-                    info(f'No permission found for StatementId: {statement_id}, FunctionName: {lambda_arn}')
+                    info(
+                        f'No permission found for StatementId: {statement_id}, FunctionName: {lambda_arn}'
+                    )
 
     info(f'adding permission [{statement_id}] for lambda: [{lambda_arn}]')
     source_arn = f'arn:aws:execute-api:{region}:{account_id}:{api_id}/*/*/*/'

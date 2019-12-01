@@ -104,8 +104,6 @@ def test_create_method(api_client):
     assert_that(method_response).has_statusCode('200')
 
 
-
-
 # def test_link_lambda_with_gateway(api_client, api_id, root_resource_id, lambda_uri):
 # 	pass
 
@@ -143,5 +141,5 @@ def test_grant_lambda_permission_to_resource(lambda_client):
   )
   policy = lambda_client.get_policy()
   info(policy)
-''',
+'''
 ]

@@ -15,22 +15,15 @@ def update_dns_a_record(domain_name, alias_target_dns_name):
         'Name': domain_name,
         'Type': 'A',
         'AliasTarget': {
-            'HostedZoneId': 'Z2FDTNDATAQYW2', # This is a magic value that means 'CloudFront'
+            'HostedZoneId': 'Z2FDTNDATAQYW2',  # This is a magic value that means 'CloudFront'
             'DNSName': alias_target_dns_name,
             'EvaluateTargetHealth': False,
-        }
+        },
     }
 
     response = r53_client.change_resource_record_sets(
         HostedZoneId=zone_id,
-        ChangeBatch={
-            'Changes': [
-                {
-                    'Action': 'UPSERT',
-                    'ResourceRecordSet': record_set
-                }
-            ]
-        }
+        ChangeBatch={'Changes': [{'Action': 'UPSERT', 'ResourceRecordSet': record_set}]},
     )
 
     if response:
@@ -38,18 +31,11 @@ def update_dns_a_record(domain_name, alias_target_dns_name):
         info('Resource record change submitted: status of change is: [%s]' % change_info['Status'])
         if change_info['Status'] == 'PENDING':
             waiter = r53_client.get_waiter('resource_record_sets_changed')
-            waiter.wait(
-                Id=change_info['Id'],
-                WaiterConfig={
-                    'Delay': 30,
-                    'MaxAttempts': 60
-                }
-            )
+            waiter.wait(Id=change_info['Id'], WaiterConfig={'Delay': 30, 'MaxAttempts': 60})
         return change_info['Id']
     else:
         warn('Empty response returned from record change submission.')
         return None
-
 
 
 def get_hosted_zone_id_for_domain(route53_client, domain_name):

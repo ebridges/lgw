@@ -13,7 +13,18 @@ DEFAULT_VENV_HOME = '/home/venv/'
 DEFAULT_OUTPUT_DIR = '/home/build/'
 DEFAULT_PACKAGES = ['gcc', 'openssl-devel', 'bzip2-devel', 'libffi-devel', 'python37-pip']
 
-DEFAULT_DOCKERIGNORE = ['.DS_Store', '.git/', '.vscode/', '.idea/', '.gradle/', '.settings/', '*.pyc', '__pycache__/', 'vue-s3-dropzone/', '.pytest_cache/']
+DEFAULT_DOCKERIGNORE = [
+    '.DS_Store',
+    '.git/',
+    '.vscode/',
+    '.idea/',
+    '.gradle/',
+    '.settings/',
+    '*.pyc',
+    '__pycache__/',
+    'vue-s3-dropzone/',
+    '.pytest_cache/',
+]
 
 
 def build_lambda_archive(
@@ -102,22 +113,22 @@ RUN cd $venv/lib/python3.7/site-packages && \
 
 
 def write_file_from_tar(data, dest, archive_filename):
-  '''
-  Extracts a single file named `archive_filename` from a tar
-  file encoded in the stream `data` to the given location `dest`.
-  Returns the new location of the extracted file.
-  '''
-  with tempfile.NamedTemporaryFile() as temp:
-      for chunk in data:
-          temp.write(chunk)
-      tf = tarfile.open(name=temp.name)
+    '''
+    Extracts a single file named `archive_filename` from a tar
+    file encoded in the stream `data` to the given location `dest`.
+    Returns the new location of the extracted file.
+    '''
+    with tempfile.NamedTemporaryFile() as temp:
+        for chunk in data:
+            temp.write(chunk)
+        tf = tarfile.open(name=temp.name)
 
-      logger = getLogger(__name__)
-      if logger.isEnabledFor(DEBUG):
-        tf.list()
+        logger = getLogger(__name__)
+        if logger.isEnabledFor(DEBUG):
+            tf.list()
 
-      tf.extract(archive_filename, path=dest)
-  return f'{dest}/{archive_filename}'
+        tf.extract(archive_filename, path=dest)
+    return f'{dest}/{archive_filename}'
 
 
 def create_docker_context(dockerfile, context_directory, context_file):
@@ -126,6 +137,7 @@ def create_docker_context(dockerfile, context_directory, context_file):
     along with the given `dockerfile`.
     Returns the filename containing the given context.
     '''
+
     def tar_exclude_filter(ti):
         for item in DEFAULT_DOCKERIGNORE:
             if item in ti.name:
@@ -145,7 +157,7 @@ def create_docker_context(dockerfile, context_directory, context_file):
 
         logger = getLogger(__name__)
         if logger.isEnabledFor(DEBUG):
-          tar.list()
+            tar.list()
 
     return context_file
 
@@ -155,16 +167,16 @@ def print_progress(line):
     if s:
         for l in s.split('\r\n'):
             if l.strip():
-              try:
-                dd = ast.literal_eval(l.strip())
-              except:
-                warn(l)
-              else:
-                if 'stream' in dd:
-                  ss = dd['stream']
-                  if ss:
-                    debug(ss.strip())
-                if 'error' in dd:
-                  ee = dd['error']
-                  if ee:
-                    error(ee.strip())
+                try:
+                    dd = ast.literal_eval(l.strip())
+                except:
+                    warn(l)
+                else:
+                    if 'stream' in dd:
+                        ss = dd['stream']
+                        if ss:
+                            debug(ss.strip())
+                    if 'error' in dd:
+                        ee = dd['error']
+                        if ee:
+                            error(ee.strip())

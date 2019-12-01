@@ -69,7 +69,12 @@ def handle_lambda_archive(config):
     info(f'handle_lambda_archive() called.')
     addl_files = []
     if config('aws_lambda_archive_addl_files'):
-        addl_files = [(x,y) for x,y in (line.split(',') for line in config('aws_lambda_archive_addl_files').split(';'))]
+        addl_files = [
+            (x, y)
+            for x, y in (
+                line.split(',') for line in config('aws_lambda_archive_addl_files').split(';')
+            )
+        ]
 
     addl_packages = []
     if config('aws_lambda_archive_addl_packages'):
@@ -84,11 +89,7 @@ def handle_lambda_archive(config):
         makedirs(bundle_dir)
 
     path_to_archive = build_lambda_archive(
-        context_dir,
-        bundle_dir,
-        config('aws_lambda_archive_bundle_name'),
-        addl_files,
-        addl_packages
+        context_dir, bundle_dir, config('aws_lambda_archive_bundle_name'), addl_files, addl_packages
     )
     print(path_to_archive)
     info(f'lambda archive location: [{path_to_archive}]')
@@ -125,31 +126,38 @@ def handle_deploy_api_gateway(config):
     info('REST API URL: [%s]' % api_url)
     return 1
 
+
 def handle_undeploy_api_gateway(config):
     delete_rest_api(config('aws_api_name'))
     info('API Gateway %s deleted.' % config('aws_api_name'))
     return 1
 
+
 def handle_add_domain(config):
-    add_domain_mapping(
-        config('aws_api_name'),
-        config('aws_api_domain_name'),
-        config('aws_api_base_path'),
-        config('aws_acm_certificate_arn'),
-        config('aws_api_deploy_stage'),
-        config('aws_api_domain_wait_until_available'),
-    )
-    info('Domain name %s mapped to path %s' % (config('aws_api_domain_name'), config('aws_api_base_path')))
-    info('HTTPS certificate validation may be pending.  Check here for status: https://console.aws.amazon.com/apigateway/home?region=us-east-1#/custom-domain-names')
+    api_name = config('aws_api_name')
+    domain_name = config('aws_api_domain_name')
+    base_path = config('aws_api_base_path')
+    cert_arn = config('aws_acm_certificate_arn')
+    deploy_stage = config('aws_api_deploy_stage')
+    wait_until = config('aws_api_domain_wait_until_available')
+
+    add_domain_mapping(api_name, domain_name, base_path, cert_arn, deploy_stage, wait_until)
+
+    info(f'Domain name {domain_name} mapped to path {base_path}')
+    info('HTTPS certificate validation may still be pending. Check here for status:')
+    info('https://console.aws.amazon.com/apigateway/home?region=us-east-1#/custom-domain-names')
+
     return 1
 
+
 def handle_remove_domain(config):
-    remove_domain_mapping(
-        config('aws_api_name'),
-        config('aws_api_domain_name'),
-        config('aws_api_base_path'),
-    )
-    info('Domain name %s unmapped from API %s' % (config('aws_api_domain_name'), config('aws_api_name')))
+    api_name = config('aws_api_name')
+    domain_name = config('aws_api_domain_name')
+    base_path = config('aws_api_base_path')
+
+    remove_domain_mapping(api_name, domain_name, base_path)
+
+    info(f'Domain name {domain_name} unmapped from API {api_name}')
     return 1
 
 
@@ -176,6 +184,7 @@ def app(args, config):
         return handle_lambda_archive(config)
 
     error('Unrecognized command.')
+
 
 def main():
     args = docopt(__doc__, version=__version__)
