@@ -8,10 +8,10 @@ Configure an AWS Gateway in front of a Lambda function.
 Lambda Gateway.
 
 Usage:
-  lgw lgw-deploy [--verbose] --config-file=<cfg>
-  lgw lgw-undeploy [--verbose] --config-file=<cfg>
-  lgw add-domain [--verbose] --config-file=<cfg>
-  lgw remove-domain [--verbose] --config-file=<cfg>
+  lgw gw-deploy [--verbose] --config-file=<cfg>
+  lgw gw-undeploy [--verbose] --config-file=<cfg>
+  lgw domain-add [--verbose] --config-file=<cfg>
+  lgw domain-remove [--verbose] --config-file=<cfg>
   lgw lambda-deploy [--verbose] --config-file=<cfg> --lambda-file=<zip>
   lgw lambda-invoke [--verbose] --lambda-name=<name> [--payload=<json>]
   lgw lambda-delete [--verbose] --lambda-name=<name>
@@ -25,7 +25,6 @@ Options:
   --lambda-file=<zip>   Path to zip file with executable lambda code.
   --lambda-name=<name>  Name of the lambda to invoke or delete.
   --payload=<json>      Path to a file of type json with data to send with the lambda invocation.
-
 ```
 
 ## Configuration Parameters

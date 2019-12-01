@@ -2,10 +2,10 @@
 Lambda Gateway.
 
 Usage:
-  lgw lgw-deploy [--verbose] --config-file=<cfg>
-  lgw lgw-undeploy [--verbose] --config-file=<cfg>
-  lgw add-domain [--verbose] --config-file=<cfg>
-  lgw remove-domain [--verbose] --config-file=<cfg>
+  lgw gw-deploy [--verbose] --config-file=<cfg>
+  lgw gw-undeploy [--verbose] --config-file=<cfg>
+  lgw domain-add [--verbose] --config-file=<cfg>
+  lgw domain-remove [--verbose] --config-file=<cfg>
   lgw lambda-deploy [--verbose] --config-file=<cfg> --lambda-file=<zip>
   lgw lambda-invoke [--verbose] --lambda-name=<name> [--payload=<json>]
   lgw lambda-delete [--verbose] --lambda-name=<name>
@@ -154,13 +154,13 @@ def handle_remove_domain(config):
 
 
 def app(args, config):
-    if args.get('lgw-deploy'):
+    if args.get('gw-deploy'):
         return handle_deploy_api_gateway(config)
-    if args.get('lgw-undeploy'):
+    if args.get('gw-undeploy'):
         return handle_undeploy_api_gateway(config)
-    if args.get('add-domain'):
+    if args.get('domain-add'):
         return handle_add_domain(config)
-    if args.get('remove-domain'):
+    if args.get('domain-remove'):
         return handle_remove_domain(config)
     if args.get('lambda-deploy'):
         file = path.abspath(args.get('--lambda-file'))
