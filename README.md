@@ -338,6 +338,7 @@ git add pyproject.toml lgw/version.py
 git commit -m 'bump version'
 dephell deps convert
 poetry publish --build
+git flow release finish x.y.z
 ```
 
 ## Info
