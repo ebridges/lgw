@@ -1,3 +1,6 @@
+[![PyPi License](https://img.shields.io/pypi/l/lgw?color=blue)](https://github.com/ebridges/lgw/blob/master/LICENSE)
+[![PyPi](https://img.shields.io/pypi/v/lgw.svg?style=flat-square)](https://pypi.org/project/lgw/)
+
 # Lambda Gateway
 
 Configure an AWS Gateway in front of a Lambda function.
@@ -340,9 +343,3 @@ dephell deps convert
 poetry publish --build
 git flow release finish x.y.z
 ```
-
-## Info
-
-[![GitHub watchers](https://img.shields.io/github/watchers/badges/shields.svg?style=social&label=Watch&style=flat-square)]()
-[![PyPi License](https://img.shields.io/pypi/l/lgw?color=blue)]()
-[![PyPi](https://img.shields.io/pypi/v/lgw.svg?style=flat-square)]()
