@@ -15,6 +15,7 @@ Usage:
   lgw lambda-deploy [--verbose] --config-file=<cfg> --lambda-file=<zip>
   lgw lambda-invoke [--verbose] --lambda-name=<name> [--payload=<json>]
   lgw lambda-delete [--verbose] --lambda-name=<name>
+  lgw lambda-archive [--verbose] --config-file=<cfg>
 
 Options:
   -h --help             Show this screen.
@@ -153,5 +154,40 @@ Defaults are configured in `lgw.settings`.
 <td><code>AWS_LAMBDA_TAGS</code></td>
 <td>List of tags to categorize this Lambda.  Format: "tagA=valA;tagB=valB;...</td>
 <td>N/A</td>
+</tr>
+<tr>
+<td><code>AWS_LAMBDA_ARCHIVE_CONTEXT_DIR</code></td>
+<td>Root directory of the project that will provide files to be copied into the Docker image.  If the directory ends with a trailing slash, then the root of the context will be the contents of the directory; otherwise the leaf directory will be at the root of the context.</td>
+<td><tt>.</tt></td>
+</tr>
+<tr>
+<td><code>AWS_LAMBDA_ARCHIVE_BUNDLE_DIR</code></td>
+<td>Destination directory to write Lambda archive zipfile. </td>
+<td><tt>./build</tt></td>
+</tr>
+<tr>
+<tr>
+<td><code>AWS_LAMBDA_ARCHIVE_BUNDLE_NAME</code></td>
+<td>Filename of Lambda archive zipfile. </td>
+<td><tt>lambda-bundle.zip</tt></td>
+</tr>
+<tr>
+<td><code>AWS_LAMBDA_ARCHIVE_ADDL_FILES</code></td>
+<td>List of 2-tuples of files to copy into the context directory from the local computer. Format: "srcA,desA;srcB=desB;srcC=desC;...</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><code>AWS_LAMBDA_ARCHIVE_ADDL_PACKAGES</code></td>
+<td>List of <tt>yum</tt> packages to install in the Docker image.  Format: "packageA,packageB,packageC,...</td>
+<td>
+Default installed by this script:
+<ul>
+<li><tt>gcc</tt></li>
+<li><tt>openssl-devel</tt></li>
+<li><tt>bzip2-devel</tt></li>
+<li><tt>libffi-devel</tt></li>
+<li><tt>python37-pip</tt></li>
+</ul>
+</td>
 </tr>
 </table>

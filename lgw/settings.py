@@ -22,4 +22,9 @@ def defaults():
     'aws_lambda_vpc_security_groups': '',
     'aws_lambda_environment': '',
     'aws_lambda_tags': '',
+    'aws_lambda_archive_context_dir': '.',
+    'aws_lambda_archive_bundle_dir': './build',
+    'aws_lambda_archive_bundle_name': 'lambda-bundle.zip',
+    'aws_lambda_archive_addl_files': '',
+    'aws_lambda_archive_addl_packages': '',
   }
