@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lgw"
-version = "0.1.0"
+version = "1.0.0"
 description = "Lambda Gateway"
 authors = ["Edward Q. Bridges <ebridges@roja.cc>"]
 
