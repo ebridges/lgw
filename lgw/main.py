@@ -2,13 +2,14 @@
 Lambda Gateway.
 
 Usage:
-  lgw lgw-deploy [--verbose] --config-file=<cfg>
-  lgw lgw-undeploy [--verbose] --config-file=<cfg>
-  lgw add-domain [--verbose] --config-file=<cfg>
-  lgw remove-domain [--verbose] --config-file=<cfg>
+  lgw gw-deploy [--verbose] --config-file=<cfg>
+  lgw gw-undeploy [--verbose] --config-file=<cfg>
+  lgw domain-add [--verbose] --config-file=<cfg>
+  lgw domain-remove [--verbose] --config-file=<cfg>
   lgw lambda-deploy [--verbose] --config-file=<cfg> --lambda-file=<zip>
   lgw lambda-invoke [--verbose] --lambda-name=<name> [--payload=<json>]
   lgw lambda-delete [--verbose] --lambda-name=<name>
+  lgw lambda-archive [--verbose] --config-file=<cfg>
 
 Options:
   -h --help             Show this screen.
@@ -20,7 +21,7 @@ Options:
   --payload=<json>      Path to a file of type json with data to send with the lambda invocation.
 '''
 
-from os import path
+from os import path, makedirs
 import json
 from logging import info, debug, error
 from everett.manager import ConfigManager, ConfigOSEnv, ConfigEnvFileEnv, ConfigDictEnv
@@ -31,6 +32,7 @@ from lgw import settings
 from lgw.api_gateway import create_rest_api, delete_rest_api
 from lgw.api_gateway_domain import add_domain_mapping, remove_domain_mapping
 from lgw.lambda_util import deploy_function, invoke_function, delete_function
+from lgw.lambda_bundle import build_lambda_archive
 
 
 def handle_deploy_lambda(file, config):
@@ -61,6 +63,35 @@ def handle_deploy_lambda(file, config):
     print(lambda_arn)
     info('Lambda [%s] created.' % config('aws_lambda_name'))
     return 1
+
+
+def handle_lambda_archive(config):
+    info(f'handle_lambda_archive() called.')
+    addl_files = []
+    if config('aws_lambda_archive_addl_files'):
+        addl_files = [(x,y) for x,y in (line.split(',') for line in config('aws_lambda_archive_addl_files').split(';'))]
+
+    addl_packages = []
+    if config('aws_lambda_archive_addl_packages'):
+        addl_packages = config('aws_lambda_archive_addl_packages').split(',')
+
+    context_dir = path.abspath(config('aws_lambda_archive_context_dir'))
+    if not path.exists(context_dir):
+        raise FileNotFoundError(f'context dir not found: [context_dir]')
+
+    bundle_dir = path.abspath(config('aws_lambda_archive_bundle_dir'))
+    if not path.exists(bundle_dir):
+        makedirs(bundle_dir)
+
+    path_to_archive = build_lambda_archive(
+        context_dir,
+        bundle_dir,
+        config('aws_lambda_archive_bundle_name'),
+        addl_files,
+        addl_packages
+    )
+    print(path_to_archive)
+    info(f'lambda archive location: [{path_to_archive}]')
 
 
 def handle_invoke_lambda(name, payload):
@@ -123,13 +154,13 @@ def handle_remove_domain(config):
 
 
 def app(args, config):
-    if args.get('lgw-deploy'):
+    if args.get('gw-deploy'):
         return handle_deploy_api_gateway(config)
-    if args.get('lgw-undeploy'):
+    if args.get('gw-undeploy'):
         return handle_undeploy_api_gateway(config)
-    if args.get('add-domain'):
+    if args.get('domain-add'):
         return handle_add_domain(config)
-    if args.get('remove-domain'):
+    if args.get('domain-remove'):
         return handle_remove_domain(config)
     if args.get('lambda-deploy'):
         file = path.abspath(args.get('--lambda-file'))
@@ -141,6 +172,8 @@ def app(args, config):
     if args.get('lambda-delete'):
         name = args.get('--lambda-name')
         return handle_delete_lambda(name)
+    if args.get('lambda-archive'):
+        return handle_lambda_archive(config)
 
     error('Unrecognized command.')
 
