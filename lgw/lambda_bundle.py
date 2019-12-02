@@ -121,13 +121,14 @@ def write_file_from_tar(data, dest, archive_filename):
     with tempfile.NamedTemporaryFile() as temp:
         for chunk in data:
             temp.write(chunk)
-        tf = tarfile.open(name=temp.name)
+        with tarfile.open(name=temp.name) as tf:
 
-        logger = getLogger(__name__)
-        if logger.isEnabledFor(DEBUG):
-            tf.list()
+            logger = getLogger(__name__)
+            if logger.isEnabledFor(DEBUG):
+                for tinfo in tf.getnames():
+                    debug(f'>    {tinfo}')
 
-        tf.extract(archive_filename, path=dest)
+            tf.extract(archive_filename, path=dest)
     return f'{dest}/{archive_filename}'
 
 
@@ -157,7 +158,8 @@ def create_docker_context(dockerfile, context_directory, context_file):
 
         logger = getLogger(__name__)
         if logger.isEnabledFor(DEBUG):
-            tar.list()
+            for tinfo in tar.getnames():
+                debug(f'>    {tinfo}')
 
     return context_file
 
