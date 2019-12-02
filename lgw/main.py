@@ -80,7 +80,11 @@ def handle_lambda_archive(config):
     if config('aws_lambda_archive_addl_packages'):
         addl_packages = config('aws_lambda_archive_addl_packages').split(',')
 
-    context_dir = path.abspath(config('aws_lambda_archive_context_dir'))
+    context_dir = config('aws_lambda_archive_context_dir')
+    if context_dir == '.':
+        context_dir = path.abspath(context_dir)
+        context_dir = f'{context_dir}/'
+
     if not path.exists(context_dir):
         raise FileNotFoundError(f'context dir not found: [context_dir]')
 
