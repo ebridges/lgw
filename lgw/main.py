@@ -24,8 +24,9 @@ Options:
 from os import path, makedirs
 import json
 from logging import info, debug, error
-from everett.manager import ConfigManager, ConfigOSEnv, ConfigEnvFileEnv, ConfigDictEnv
+from everett.manager import ConfigManager, ConfigOSEnv, ConfigDictEnv
 from docopt import docopt
+from dotenv import dotenv_values, find_dotenv
 from lgw.util import configure_logging
 from lgw.version import __version__
 from lgw import settings
@@ -190,21 +191,32 @@ def app(args, config):
     error('Unrecognized command.')
 
 
+def load_config(config_file):
+    # python-dotenv enables interpolation of values in config file
+    # from the environment or elsewhere in the config file using
+    # POSIX variable expansion
+    local_conf = dotenv_values(find_dotenv())
+    project_conf = dotenv_values(dotenv_path=config_file)
+    config = ConfigManager(
+        [
+            ConfigOSEnv(),
+            ConfigDictEnv(local_conf),
+            ConfigDictEnv(project_conf),
+            ConfigDictEnv(settings.defaults()),
+        ]
+    )
+    return config
+
+
 def main():
     args = docopt(__doc__, version=__version__)
     configure_logging(args.get('--verbose'))
     config_file = args.get('--config-file', None)
     if config_file:
         config_file = path.abspath(config_file)
+    debug(f'Reading config from file {config_file}')
 
-    config = ConfigManager(
-        [
-            ConfigOSEnv(),
-            ConfigEnvFileEnv('.env'),
-            ConfigEnvFileEnv(config_file),
-            ConfigDictEnv(settings.defaults()),
-        ]
-    )
+    config = load_config(config_file)
 
     app(args, config)
 
