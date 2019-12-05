@@ -51,7 +51,7 @@ def configure_base_path_mapping(api_client, api_id, domain_name, deploy_stage, b
 
     if response:
         info(f'Base path mapping {domain_name}:{base_path} already exists.')
-        return
+        api_client.delete_base_path_mapping(domainName=domain_name, basePath=base_path)
 
     response = api_client.create_base_path_mapping(
         domainName=domain_name, basePath=base_path, restApiId=api_id, stage=deploy_stage
