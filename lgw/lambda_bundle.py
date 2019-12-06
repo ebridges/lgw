@@ -101,12 +101,12 @@ RUN echo "source $venv/bin/activate" > $HOME/.profile
 
 RUN cd $wkdir && \
     zip -9 -r \
-    $output/{archive_filename} * \
-    --exclude '*/bin' '*dist-info*' '*__pycache__*' '*.pyc'
+    $output/{archive_filename} . \
+    --exclude '*/bin' '*dist-info*' '*__pycache__*' '*.pyc' '*/locale/*'
 RUN cd $venv/lib/python3.7/site-packages && \
     zip -9 -r -u \
-    $output/{archive_filename} * \
-    --exclude '*/bin' '*dist-info*' '*__pycache__*' '*.pyc'
+    $output/{archive_filename} . \
+    --exclude '*/bin' '*dist-info*' '*__pycache__*' '*.pyc' '*/locale/*'
 '''
 
     return dockerfile
