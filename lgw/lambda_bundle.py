@@ -14,14 +14,19 @@ DEFAULT_OUTPUT_DIR = '/home/build/'
 DEFAULT_PACKAGES = ['gcc', 'openssl-devel', 'bzip2-devel', 'libffi-devel', 'python37-pip']
 
 DEFAULT_DOCKERIGNORE = [
-    '.DS_Store',
+    '**/.DS_Store',
     '.git/',
+    '.gitignore',
     '.vscode/',
     '.idea/',
     '.gradle/',
     '.settings/',
-    '*.pyc',
-    '__pycache__/',
+    '**/*.pyc',
+    '**/__pycache__/',
+    '**/db.sqlite3',
+    '*.sublime-project',
+    '*.sublime-workspace',
+    '*.retry',
     'vue-s3-dropzone/',
     '.pytest_cache/',
 ]
