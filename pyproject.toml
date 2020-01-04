@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lgw"
-version = "1.0.6"
+version = "1.0.7a"
 description = "Configure an AWS Gateway in front of a Lambda function."
 authors = ["Edward Q. Bridges <ebridges@roja.cc>"]
 license = "Apache-2.0"
