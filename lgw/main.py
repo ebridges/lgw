@@ -38,12 +38,12 @@ from lgw.lambda_bundle import build_lambda_archive
 
 def handle_deploy_lambda(file, config):
     info('handle_deploy_lambda() called with file [%s]' % file)
+
     if not path.isfile(file):
-        error('ERROR: Lambda zip file not found at location: [%s]' % file)
-        return
+        raise FileNotFoundError('ERROR: Lambda zip file not found at location: [%s]' % file)
+
     if not file.endswith('.zip'):
-        error('ERROR: Lambda file expected to be in ZIP format.')
-        return
+        raise FileNotFoundError('ERROR: Lambda file expected to be in ZIP format.')
 
     lambda_arn = deploy_function(
         file,
