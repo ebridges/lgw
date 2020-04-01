@@ -5,9 +5,11 @@ import ast
 import tarfile
 import os
 import tempfile
+from os.path import exists
 
 from logging import debug, info, warn, error, getLogger, DEBUG
 
+DOCKER_SOCKET_FILE = '/var/run/docker.sock'
 DEFAULT_CODE_HOME = '/home/code/'
 DEFAULT_VENV_HOME = '/home/venv/'
 DEFAULT_OUTPUT_DIR = '/home/build/'
@@ -39,6 +41,11 @@ def build_lambda_archive(
     addl_project_files=[],
     addl_yum_packages=[],
 ):
+    if not exists(DOCKER_SOCKET_FILE):
+        error(f'Docker listen socket not found at {DOCKER_SOCKET_FILE}')
+        raise FileNotFoundError(
+            f'Docker listen socket not found at {DOCKER_SOCKET_FILE}, is Docker running?'
+        )
 
     info('Assembling Dockerfile.')
     dockerfile = create_dockerfile(lambda_archive_filename, addl_project_files, addl_yum_packages)
@@ -49,7 +56,7 @@ def build_lambda_archive(
     info(f'Building docker image based on files in {context_dir}')
     with tempfile.NamedTemporaryFile() as tmp:
         docker_context_file = create_docker_context(dockerfile, context_dir, tmp.name)
-        cli = docker.APIClient(base_url='unix:///var/run/docker.sock')
+        cli = docker.APIClient(base_url=f'unix://{DOCKER_SOCKET_FILE}')
         for line in cli.build(fileobj=tmp, custom_context=True, encoding='gzip', tag=tag):
             print_progress(line)
 
