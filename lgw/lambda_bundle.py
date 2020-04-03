@@ -114,12 +114,16 @@ RUN echo "source $venv/bin/activate" > $HOME/.profile
 RUN cd $wkdir && \
     zip -9 -r \
     $output/{archive_filename} . \
-    --exclude '*/bin' '*dist-info*' '*__pycache__*' '*.pyc'
+    --exclude '*/bin' '*dist-info*' '*__pycache__*' \
+        '*.pyc' '*easy_install.py*' '*pip/*' \
+            '*setuptools/*' '*pkg_resources/*'
 
 RUN cd $venv/lib/python3.7/site-packages && \
     zip -9 -r -u \
     $output/{archive_filename} . \
-    --exclude '*/bin' '*dist-info*' '*__pycache__*' '*.pyc'
+    --exclude '*/bin' '*dist-info*' '*__pycache__*' \
+        '*.pyc' '*easy_install.py*' '*pip/*' \
+            '*setuptools/*' '*pkg_resources/*'
 
 '''
 
