@@ -306,7 +306,7 @@ Defaults are configured in `lgw.settings`.
 </ul>
 </td>
 <td><code>AWS_LAMBDA_ARCHIVE_ADDL_FILES</code></td>
-<td>List of 2-tuples of files to copy into the context directory from the local computer. Format: "<tt>srcA,desA;srcB=desB;srcC=desC;...</tt>"</td>
+<td>List of 2-tuples of files to copy into the context directory from the local computer. Format: "<tt>srcA,desA;srcB,desB;srcC,desC;...</tt>"</td>
 <td>N/A</td>
 </tr>
 <tr>
