@@ -5,22 +5,35 @@ from botocore.exceptions import ClientError
 from lgw.lambda_util import get_lambda_info, grant_permission_to_api_resource
 
 
-def create_rest_api(api_name, lambda_name, resource_path, deploy_stage, integration_role):
+def create_rest_api(
+    api_name,
+    api_description,
+    binary_types,
+    lambda_name,
+    resource_path,
+    deploy_stage,
+    integration_role,
+    method_response_models,
+):
     '''
     Creates & deploys a REST API that proxies to a Lambda function, returning the URL
     pointing to this API.
 
     :param api_name: Name of the REST API
+    :param api_description: Textual description of the API
+    :param binary_types: A list of binary types that this API may serve up
     :param lambda_name: Name of an existing Lambda function
     :param resource_path: The resource path that points to the lambda.
     :param deploy_stage: The name of the deployment stage.
+    :param integration_role
+    :param method_response_models: Dictionary of content-type => response-model mappings to be applied to child method
 
     :return: URL of API. If error, returns None.
     '''
 
     api_client = boto3.client('apigateway')
 
-    api_id = create_api_gateway(api_client, api_name)
+    api_id = create_api_gateway(api_client, api_name, api_description, binary_types)
 
     (lambda_arn, lambda_uri, region, account_id) = get_lambda_info(lambda_name)
 
@@ -29,7 +42,7 @@ def create_rest_api(api_name, lambda_name, resource_path, deploy_stage, integrat
     create_lambda_integration(api_client, api_id, root_resource_id, lambda_uri, integration_role)
 
     child_resource_id = create_resource(api_client, api_id, root_resource_id, resource_path)
-    create_method(api_client, api_id, child_resource_id, 'ANY')
+    create_method(api_client, api_id, child_resource_id, 'ANY', method_response_models)
     create_lambda_integration(api_client, api_id, child_resource_id, lambda_uri, integration_role)
 
     deploy_to_stage(api_client, api_id, deploy_stage)
@@ -65,7 +78,7 @@ def create_lambda_integration(api_client, api_id, root_resource_id, lambda_uri, 
     )
 
 
-def create_method(api_client, api_id, resource_id, http_method):
+def create_method(api_client, api_id, resource_id, http_method, method_response_models=None):
     try:
         response = api_client.get_method(
             restApiId=api_id, resourceId=resource_id, httpMethod=http_method
@@ -87,7 +100,7 @@ def create_method(api_client, api_id, resource_id, http_method):
         resourceId=resource_id,
         httpMethod=http_method,
         statusCode='200',
-        responseModels=content_type,
+        responseModels=method_response_models,
     )
 
 
@@ -129,8 +142,10 @@ def delete_api_gateway(api_client, api_name):
         api_client.delete_rest_api(restApiId=api_id)
 
 
-def create_api_gateway(api_client, api_name):
-    api_id = lookup_api_gateway(api_client, api_name)
+def create_api_gateway(api_client, api_name, api_description, binary_types):
+    api_id = lookup_api_gateway(
+        api_client, api_name, description=api_description, binaryMediaTypes=binary_types
+    )
     if api_id:
         return api_id
     info(f'No existing API account found for {api_name}, creating it.')
