@@ -78,7 +78,7 @@ def create_lambda_integration(api_client, api_id, root_resource_id, lambda_uri, 
     )
 
 
-def create_method(api_client, api_id, resource_id, http_method, method_response_models=None):
+def create_method(api_client, api_id, resource_id, http_method, method_response_models={}):
     try:
         response = api_client.get_method(
             restApiId=api_id, resourceId=resource_id, httpMethod=http_method
@@ -94,7 +94,6 @@ def create_method(api_client, api_id, resource_id, http_method, method_response_
     )
 
     # Set the content-type of the method response to JSON
-    content_type = {'application/json': 'Empty'}
     api_client.put_method_response(
         restApiId=api_id,
         resourceId=resource_id,
