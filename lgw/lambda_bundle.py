@@ -139,6 +139,8 @@ def write_file_from_tar(data, dest, archive_filename):
     with tempfile.NamedTemporaryFile() as temp:
         for chunk in data:
             temp.write(chunk)
+        temp.flush()
+        os.fsync(temp)
         with tarfile.open(name=temp.name) as tf:
 
             logger = getLogger(__name__)
