@@ -1,5 +1,6 @@
 from logging import info, warn
 import boto3
+from tld import get_fld
 
 
 def update_dns_a_record(domain_name, alias_target_dns_name):
@@ -10,7 +11,11 @@ def update_dns_a_record(domain_name, alias_target_dns_name):
     '''
     r53_client = boto3.client('route53')
 
-    zone_id = get_hosted_zone_id_for_domain(r53_client, domain_name)
+    apex_domain = get_fld(domain_name, fix_protocol=True)
+
+    zone_id = get_hosted_zone_id_for_domain(r53_client, apex_domain)
+    info(f'located {zone_id} as zone id for {apex_domain}')
+
     record_set = {
         'Name': domain_name,
         'Type': 'A',
