@@ -120,12 +120,24 @@ def handle_delete_lambda(name):
 
 
 def handle_deploy_api_gateway(config):
+    if config('aws_api_binary_types'):
+        binary_types = config('aws_api_binary_types').split(',')
+
+    response_models = {}
+    if config('aws_api_response_models'):
+        response_models = dict(
+            item.split('=') for item in config('aws_api_response_models').split(';')
+        )
+
     api_url = create_rest_api(
         config('aws_api_name'),
+        config('aws_api_description'),
+        binary_types,
         config('aws_lambda_name'),
         config('aws_api_resource_path'),
         config('aws_api_deploy_stage'),
         config('aws_api_lambda_integration_role'),
+        response_models,
     )
     print(api_url)
     info('REST API URL: [%s]' % api_url)

@@ -73,6 +73,16 @@ Defaults are configured in `lgw.settings`.
   <li><tt>gw-deploy</tt></li>
 </ul>
 </td>
+<td><code>AWS_API_DESCRIPTION</code></td>
+<td>Description of the created API gateway.</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>
+<ul>
+  <li><tt>gw-deploy</tt></li>
+</ul>
+</td>
 <td><code>AWS_API_RESOURCE_PATH</code></td>
 <td>Resource path for the API. By default it's a greedy path to proxy all requests.</td>
 <td><tt>{proxy+}</tt></td>
@@ -86,6 +96,26 @@ Defaults are configured in `lgw.settings`.
 <td><code>AWS_API_DEPLOY_STAGE</code></td>
 <td>Name for the stage that the API gets deployed to. E.g. "production"</td>
 <td>N/A</td>
+</tr>
+<tr>
+<td>
+<ul>
+  <li><tt>gw-deploy</tt></li>
+</ul>
+</td>
+<td><code>AWS_API_BINARY_TYPES</code></td>
+<td>Listing of binary media types to configure the gateway as handling.  Example: <tt>image/jpeg,image/png</tt></td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>
+<ul>
+  <li><tt>gw-deploy</tt></li>
+</ul>
+</td>
+<td><code>AWS_API_RESPONSE_MODELS</code></td>
+<td>Response content-type: model mapping of the response body.  Typically used for mapping binary content-types.  For binary types specify: <tt>image/*=Empty</tt></td>
+<td><tt>application/json=Empty</tt></td>
 </tr>
 <tr>
 <td>
