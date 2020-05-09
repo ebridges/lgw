@@ -520,6 +520,7 @@ server = ["flask"]
 reference = "c80f63fc8259bcadc8a9b157c3fa500938b72062"
 type = "git"
 url = "https://github.com/spulec/moto.git"
+
 [[package]]
 category = "dev"
 description = "Python package for creating and manipulating graphs and networks"
@@ -817,6 +818,14 @@ ecdsa = ">=0.13"
 dev = ["twine", "wheel"]
 
 [[package]]
+category = "main"
+description = "Extract the top-level domain (TLD) from the URL given."
+name = "tld"
+optional = false
+python-versions = ">=2.7, <4"
+version = "0.12.1"
+
+[[package]]
 category = "dev"
 description = "Python Library for Tom's Obvious, Minimal Language"
 name = "toml"
@@ -922,7 +931,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["pathlib2", "contextlib2", "unittest2"]
 
 [metadata]
-content-hash = "3e65c21fa305975aea4751f43b666610e41121607f42c67d9df3e1752341fc37"
+content-hash = "4961b45dcdec1dcd5cf1dc469bdf33ecb89a4fc7dc5d69c56ffa0315b5fb9885"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -1305,6 +1314,14 @@ six = [
 sshpubkeys = [
     {file = "sshpubkeys-3.1.0-py2.py3-none-any.whl", hash = "sha256:9f73d51c2ef1e68cd7bde0825df29b3c6ec89f4ce24ebca3bf9eaa4a23a284db"},
     {file = "sshpubkeys-3.1.0.tar.gz", hash = "sha256:b388399caeeccdc145f06fd0d2665eeecc545385c60b55c282a15a022215af80"},
+]
+tld = [
+    {file = "tld-0.12.1-py27-none-any.whl", hash = "sha256:c344206d7d297746b5cb501963f26641bd71462d698919822d75fe7c646e151b"},
+    {file = "tld-0.12.1-py35-none-any.whl", hash = "sha256:eb494c2ea14bb585134154734d7159da1a915a64ac60be0eaff64d9d80a40900"},
+    {file = "tld-0.12.1-py36-none-any.whl", hash = "sha256:a7e04f0f00184c05f72e62f36cc156349f3070add4a328b0e26d425a55db24e7"},
+    {file = "tld-0.12.1-py37-none-any.whl", hash = "sha256:046e186bc57c2ea338f85d39c9448888e0229c8e2770602fd84ebc5ac06ff912"},
+    {file = "tld-0.12.1-py38-none-any.whl", hash = "sha256:04d8cbd11fcfb6a2b71c05ec59ab1ddeb6f205013b74e2beed7ae06c2c948264"},
+    {file = "tld-0.12.1.tar.gz", hash = "sha256:bc11bcf39dce89102d7c6dafffe675e2eab8ddbf7267a615f745d4d288bafc95"},
 ]
 toml = [
     {file = "toml-0.10.0-py2.7.egg", hash = "sha256:f1db651f9657708513243e61e6cc67d101a39bad662eaa9b5546f789338e07a3"},
