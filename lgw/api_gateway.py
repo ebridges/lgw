@@ -143,13 +143,13 @@ def delete_api_gateway(api_client, api_name):
 
 
 def create_api_gateway(api_client, api_name, api_description, binary_types):
-    api_id = lookup_api_gateway(
-        api_client, api_name, description=api_description, binaryMediaTypes=binary_types
-    )
+    api_id = lookup_api_gateway(api_client, api_name)
     if api_id:
         return api_id
     info(f'No existing API account found for {api_name}, creating it.')
-    result = api_client.create_rest_api(name=api_name)
+    result = api_client.create_rest_api(
+        name=api_name, description=api_description, binaryMediaTypes=binary_types
+    )
     return result['id']
 
 
