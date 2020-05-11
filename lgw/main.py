@@ -120,6 +120,7 @@ def handle_delete_lambda(name):
 
 
 def handle_deploy_api_gateway(config):
+    binary_types = []
     if config('aws_api_binary_types'):
         binary_types = config('aws_api_binary_types').split(',')
 
