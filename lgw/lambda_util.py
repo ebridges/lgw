@@ -38,8 +38,13 @@ def deploy_function(
         sec_grps = vpc_security_groups.split(',')
         vpc_config = {'SubnetIds': subnets, 'SecurityGroupIds': sec_grps}
 
-    sz = stat(archive).st_size
+    if archive:
+        sz = stat(archive).st_size
+    else:
+        sz = MAX_LAMBDA_SIZE + 1
+
     if sz < MAX_LAMBDA_SIZE:
+        assert archive is not None
         return deploy_function_from_zip(
             archive,
             lambda_name,
@@ -54,8 +59,10 @@ def deploy_function(
             t,
         )
     else:
+        if archive:
+            upload_file(s3_bucket, s3_key, archive)
+
         return deploy_function_from_s3(
-            archive,
             lambda_name,
             s3_bucket,
             s3_key,
@@ -72,7 +79,6 @@ def deploy_function(
 
 
 def deploy_function_from_s3(
-    archive,
     lambda_name,
     s3_bucket,
     s3_key,
@@ -80,13 +86,12 @@ def deploy_function_from_s3(
     execution_role,
     connection_timeout,
     memory_size,
+    runtime,
     description=None,
     vpc_config=None,
-    runtime='python3.7',
     environment=None,
     tags=None,
 ):
-    upload_file(s3_bucket, s3_key, archive)
     code = {'S3Bucket': s3_bucket, 'S3Key': s3_key}
     return create_or_replace_function(
         lambda_name,
