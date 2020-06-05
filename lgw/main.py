@@ -6,7 +6,7 @@ Usage:
   lgw gw-undeploy [--verbose] --config-file=<cfg>
   lgw domain-add [--verbose] --config-file=<cfg>
   lgw domain-remove [--verbose] --config-file=<cfg>
-  lgw lambda-deploy [--verbose] --config-file=<cfg> --lambda-file=<zip>
+  lgw lambda-deploy [--verbose] --config-file=<cfg> [--lambda-file=<zip>]
   lgw lambda-invoke [--verbose] --lambda-name=<name> [--payload=<json>]
   lgw lambda-delete [--verbose] --lambda-name=<name>
   lgw lambda-archive [--verbose] --config-file=<cfg>
@@ -36,14 +36,25 @@ from lgw.lambda_util import deploy_function, invoke_function, delete_function
 from lgw.lambda_bundle import build_lambda_archive
 
 
+def handle_deploy_lambda(config):
+    return handle_deploy_lambda(None, config)
+
+
 def handle_deploy_lambda(file, config):
-    info('handle_deploy_lambda() called with file [%s]' % file)
+    if file:
+        info('handle_deploy_lambda() called with file [{file}]')
+    else:
+        info(
+            'handle_deploy_lambda() called with s3://%s/%s'
+            % (config('aws_lambda_archive_bucket'), config('aws_lambda_archive_key'))
+        )
 
-    if not path.isfile(file):
-        raise FileNotFoundError('ERROR: Lambda zip file not found at location: [%s]' % file)
+    if file:
+        if not path.isfile(file):
+            raise FileNotFoundError('ERROR: Lambda zip file not found at location: [%s]' % file)
 
-    if not file.endswith('.zip'):
-        raise FileNotFoundError('ERROR: Lambda file expected to be in ZIP format.')
+        if not file.endswith('.zip'):
+            raise FileNotFoundError('ERROR: Lambda file expected to be in ZIP format.')
 
     lambda_arn = deploy_function(
         file,
@@ -189,8 +200,12 @@ def app(args, config):
     if args.get('domain-remove'):
         return handle_remove_domain(config)
     if args.get('lambda-deploy'):
-        file = path.abspath(args.get('--lambda-file'))
-        return handle_deploy_lambda(file, config)
+        file_arg = args.get('--lambda-file')
+        if file_arg:
+            file = path.abspath(file_arg)
+            return handle_deploy_lambda(file, config)
+        else:
+            return handle_deploy_lambda(config)
     if args.get('lambda-invoke'):
         name = args.get('--lambda-name')
         payload = args.get('--payload', None)
