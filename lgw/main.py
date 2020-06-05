@@ -2,14 +2,14 @@
 Lambda Gateway.
 
 Usage:
-  lgw gw-deploy [--verbose] --config-file=<cfg>
-  lgw gw-undeploy [--verbose] --config-file=<cfg>
-  lgw domain-add [--verbose] --config-file=<cfg>
-  lgw domain-remove [--verbose] --config-file=<cfg>
-  lgw lambda-deploy [--verbose] --config-file=<cfg> [--lambda-file=<zip>]
+  lgw gw-deploy [--verbose] [--config-file=<cfg>]
+  lgw gw-undeploy [--verbose] [--config-file=<cfg>]
+  lgw domain-add [--verbose] [--config-file=<cfg>]
+  lgw domain-remove [--verbose] [--config-file=<cfg>]
+  lgw lambda-deploy [--verbose] [--config-file=<cfg>] [--lambda-file=<zip>]
   lgw lambda-invoke [--verbose] --lambda-name=<name> [--payload=<json>]
   lgw lambda-delete [--verbose] --lambda-name=<name>
-  lgw lambda-archive [--verbose] --config-file=<cfg>
+  lgw lambda-archive [--verbose] [--config-file=<cfg>]
 
 Options:
   -h --help             Show this screen.
