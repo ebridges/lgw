@@ -2,14 +2,14 @@
 Lambda Gateway.
 
 Usage:
-  lgw gw-deploy [--verbose] --config-file=<cfg>
-  lgw gw-undeploy [--verbose] --config-file=<cfg>
-  lgw domain-add [--verbose] --config-file=<cfg>
-  lgw domain-remove [--verbose] --config-file=<cfg>
-  lgw lambda-deploy [--verbose] --config-file=<cfg> [--lambda-file=<zip>]
+  lgw gw-deploy [--verbose] [--config-file=<cfg>]
+  lgw gw-undeploy [--verbose] [--config-file=<cfg>]
+  lgw domain-add [--verbose] [--config-file=<cfg>]
+  lgw domain-remove [--verbose] [--config-file=<cfg>]
+  lgw lambda-deploy [--verbose] [--config-file=<cfg>] [--lambda-file=<zip>]
   lgw lambda-invoke [--verbose] --lambda-name=<name> [--payload=<json>]
   lgw lambda-delete [--verbose] --lambda-name=<name>
-  lgw lambda-archive [--verbose] --config-file=<cfg>
+  lgw lambda-archive [--verbose] [--config-file=<cfg>]
 
 Options:
   -h --help             Show this screen.
@@ -223,16 +223,22 @@ def load_config(config_file):
     # python-dotenv enables interpolation of values in config file
     # from the environment or elsewhere in the config file using
     # POSIX variable expansion
+
+    config_wrappers = []
+    config_wrappers.append(ConfigOSEnv())
+
     local_conf = dotenv_values(find_dotenv())
-    project_conf = dotenv_values(dotenv_path=config_file)
-    config = ConfigManager(
-        [
-            ConfigOSEnv(),
-            ConfigDictEnv(local_conf),
-            ConfigDictEnv(project_conf),
-            ConfigDictEnv(settings.defaults()),
-        ]
-    )
+    config_wrappers.append(ConfigDictEnv(local_conf))
+
+    if config_file:
+        config_file_path = path.abspath(config_file)
+        project_conf = dotenv_values(dotenv_path=config_file_path)
+        config_wrappers.append(ConfigDictEnv(project_conf))
+
+    config_wrappers.appendConfigDictEnv(settings.defaults())
+
+    config = ConfigManager(config_wrappers)
+
     return config
 
 
@@ -241,8 +247,7 @@ def main():
     configure_logging(args.get('--verbose'))
     config_file = args.get('--config-file', None)
     if config_file:
-        config_file = path.abspath(config_file)
-    debug(f'Reading config from file {config_file}')
+        debug(f'Reading config from file {config_file}')
 
     config = load_config(config_file)
 
