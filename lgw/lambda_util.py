@@ -86,9 +86,9 @@ def deploy_function_from_s3(
     execution_role,
     connection_timeout,
     memory_size,
+    runtime,
     description=None,
     vpc_config=None,
-    runtime='python3.7',
     environment=None,
     tags=None,
 ):
