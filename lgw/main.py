@@ -235,7 +235,7 @@ def load_config(config_file):
         project_conf = dotenv_values(dotenv_path=config_file_path)
         config_wrappers.append(ConfigDictEnv(project_conf))
 
-    config_wrappers.appendConfigDictEnv(settings.defaults())
+    config_wrappers.append(ConfigDictEnv(settings.defaults()))
 
     config = ConfigManager(config_wrappers)
 
