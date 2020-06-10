@@ -31,3 +31,8 @@ def defaults():
         'aws_lambda_archive_addl_files': '',
         'aws_lambda_archive_addl_packages': '',
     }
+
+
+def dump(config):
+    for key in sorted(defaults().keys()):
+        print('    %s => %s' % (key, config(key)))

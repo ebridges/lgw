@@ -22,6 +22,7 @@ Options:
 '''
 
 from os import path, makedirs
+from sys import argv
 import json
 from logging import info, debug, error
 from everett.manager import ConfigManager, ConfigOSEnv, ConfigDictEnv
@@ -34,6 +35,7 @@ from lgw.api_gateway import create_rest_api, delete_rest_api
 from lgw.api_gateway_domain import add_domain_mapping, remove_domain_mapping
 from lgw.lambda_util import deploy_function, invoke_function, delete_function
 from lgw.lambda_bundle import build_lambda_archive
+from lgw.settings import dump
 
 
 def handle_deploy_lambda(config):
@@ -42,7 +44,7 @@ def handle_deploy_lambda(config):
 
 def handle_deploy_lambda(file, config):
     if file:
-        info('handle_deploy_lambda() called with file [{file}]')
+        info(f'handle_deploy_lambda() called with file [{file}]')
     else:
         info(
             'handle_deploy_lambda() called with s3://%s/%s'
@@ -235,7 +237,7 @@ def load_config(config_file):
         project_conf = dotenv_values(dotenv_path=config_file_path)
         config_wrappers.append(ConfigDictEnv(project_conf))
 
-    config_wrappers.appendConfigDictEnv(settings.defaults())
+    config_wrappers.append(ConfigDictEnv(settings.defaults()))
 
     config = ConfigManager(config_wrappers)
 
@@ -250,9 +252,14 @@ def main():
         debug(f'Reading config from file {config_file}')
 
     config = load_config(config_file)
+    if args.get('--verbose'):
+        debug(f'All config values:')
+        dump(config)
 
     app(args, config)
 
 
 if __name__ == '__main__':
+    if '--verbose' in argv:
+        print(argv)
     main()
