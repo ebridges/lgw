@@ -42,7 +42,7 @@ def handle_deploy_lambda(config):
 
 def handle_deploy_lambda(file, config):
     if file:
-        info('handle_deploy_lambda() called with file [{file}]')
+        info(f'handle_deploy_lambda() called with file [{file}]')
     else:
         info(
             'handle_deploy_lambda() called with s3://%s/%s'
