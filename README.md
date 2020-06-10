@@ -206,7 +206,7 @@ Defaults are configured in `lgw.settings`.
 </td>
 <td><code>AWS_LAMBDA_RUNTIME</code></td>
 <td>Lambda runtime environment.</td>
-<td><tt>python3.7</tt></td>
+<td>N/A</td>
 </tr>
 <tr>
 <td>
