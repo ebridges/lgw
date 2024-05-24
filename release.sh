@@ -15,17 +15,30 @@ if [ "$key" = '' ]; then
 
   git flow release start ${VERSION}
 
+  if [ $? -ne 0 ]; then
+    echo "Error running git flow release start ${VERSION}"
+    exit 1
+  fi
+
   result=`emacs pyproject.toml lgw/version.py`
 
   if [ ${result} ];
   then
     echo 'Error bumping version, aborting.'
+    exit 1
   fi
 
   git add pyproject.toml lgw/version.py
-  git commit --gpg-sign --message 'bump version'
+  if [ $? -ne 0 ]; then
+    echo "Error adding pyproject.toml and lgw/version.py"
+    exit 1
+  fi
 
-  dephell deps convert
+  git commit --gpg-sign --message 'bump version'
+  if [ $? -ne 0 ]; then
+    echo "Error committing"
+    exit 1
+  fi
 
   pypi_username=$(cat ~/.pypirc | grep username | awk '{ print $3 }')
   pypi_password=$(cat ~/.pypirc | grep password | awk '{ print $3 }')
