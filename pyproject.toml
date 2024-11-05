@@ -11,8 +11,7 @@ classifiers = ["Topic :: Software Development :: Build Tools"]
 exclude = ["tests", "vscode.env", "NOTES.md"]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<4.0"
-docopt = "^0.6.2"
+python = ">=3.8,<3.13"
 everett = "^1.0"
 boto3 = "^1.10"
 docker = "^4.1"
