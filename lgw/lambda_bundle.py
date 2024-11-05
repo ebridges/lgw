@@ -13,7 +13,7 @@ DOCKER_SOCKET_FILE = '/var/run/docker.sock'
 DEFAULT_CODE_HOME = '/home/code/'
 DEFAULT_VENV_HOME = '/home/venv/'
 DEFAULT_OUTPUT_DIR = '/home/build/'
-DEFAULT_PACKAGES = ['gcc', 'openssl-devel', 'bzip2-devel', 'libffi-devel', 'python37-pip']
+DEFAULT_PACKAGES = ['gcc', 'openssl-devel', 'bzip2-devel', 'libffi-devel', 'python312-pip']
 
 DEFAULT_DOCKERIGNORE = [
     '**/.DS_Store',
@@ -80,7 +80,7 @@ def create_dockerfile(archive_filename, addl_project_files, addl_yum_packages):
         addl_files += 'COPY %s %s\n' % files
 
     dockerfile = f'''
-FROM lambci/lambda:build-python3.7 AS base
+FROM lambci/lambda:build-python3.12 AS base
 
 RUN yum makecache fast
 

@@ -14,7 +14,7 @@ exclude = ["tests", "vscode.env", "NOTES.md"]
 python = ">=3.8,<3.13"
 everett = "^1.0"
 boto3 = "^1.10"
-docker = "^4.1"
+docker = "^7.1.0"
 python-dotenv = "^1"
 tld = "^0.12.1"
 moto = {version = "^5.0.7", extras = ["lambda", "apigateway"]}
