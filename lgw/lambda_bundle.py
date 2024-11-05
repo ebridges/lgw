@@ -7,7 +7,7 @@ import os
 import tempfile
 from os.path import exists
 
-from logging import debug, info, warn, error, getLogger, DEBUG
+from logging import debug, info, warning, error, getLogger, DEBUG
 
 DOCKER_SOCKET_FILE = '/var/run/docker.sock'
 DEFAULT_CODE_HOME = '/home/code/'
@@ -55,7 +55,7 @@ def build_lambda_archive(
 
     info(f'Building docker image based on files in {context_dir}')
     with tempfile.NamedTemporaryFile() as tmp:
-        docker_context_file = create_docker_context(dockerfile, context_dir, tmp.name)
+        create_docker_context(dockerfile, context_dir, tmp.name)
         cli = docker.APIClient(base_url=f'unix://{DOCKER_SOCKET_FILE}')
         for line in cli.build(fileobj=tmp, custom_context=True, encoding='gzip', tag=tag):
             print_progress(line)
@@ -65,7 +65,7 @@ def build_lambda_archive(
     container = client.containers.run(tag, command=f'/bin/sh', detach=True)
 
     info('Extracting lambda archive from running container.')
-    bits, stat = container.get_archive(f'{DEFAULT_OUTPUT_DIR}/{lambda_archive_filename}')
+    bits, _ = container.get_archive(f'{DEFAULT_OUTPUT_DIR}/{lambda_archive_filename}')
     location = write_file_from_tar(bits, lambda_archive_dir, lambda_archive_filename)
 
     container.stop()
@@ -181,7 +181,6 @@ def create_docker_context(dockerfile, context_directory, context_file):
             for tinfo in tar.getnames():
                 debug(f'>    {tinfo}')
 
-    return context_file
 
 
 def print_progress(line):
@@ -192,7 +191,7 @@ def print_progress(line):
                 try:
                     dd = ast.literal_eval(l.strip())
                 except:
-                    warn(l)
+                    warning(l)
                 else:
                     if 'stream' in dd:
                         ss = dd['stream']

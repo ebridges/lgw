@@ -104,4 +104,6 @@ def parse_args():
         help="Create a Lambda archive"
     )
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    return vars(args)

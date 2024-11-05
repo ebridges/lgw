@@ -5,7 +5,7 @@ from logging import info, debug, error
 from everett.manager import ConfigManager, ConfigOSEnv, ConfigDictEnv
 from dotenv import dotenv_values, find_dotenv
 
-from . import parse_args
+from lgw import parse_args
 
 from lgw.util import configure_logging
 from lgw import settings
@@ -54,7 +54,7 @@ def handle_deploy_lambda(config, file=None):
 
 
 def handle_lambda_archive(config):
-    info(f'handle_lambda_archive() called.')
+    info('handle_lambda_archive() called.')
     addl_files = []
     if config('aws_lambda_archive_addl_files'):
         addl_files = [
@@ -167,29 +167,30 @@ def handle_remove_domain(config):
 
 
 def app(args, config):
-    if args.get('gw-deploy'):
+    command = args.get('command')
+    if command == 'gw-deploy':
         return handle_deploy_api_gateway(config)
-    if args.get('gw-undeploy'):
+    if command == 'gw-undeploy':
         return handle_undeploy_api_gateway(config)
-    if args.get('domain-add'):
+    if command == 'domain-add':
         return handle_add_domain(config)
-    if args.get('domain-remove'):
+    if command == 'domain-remove':
         return handle_remove_domain(config)
-    if args.get('lambda-deploy'):
-        file_arg = args.get('--lambda-file')
+    if command == 'lambda-deploy':
+        file_arg = args.get('lambda_file')
         if file_arg:
             file = path.abspath(file_arg)
             return handle_deploy_lambda(config, file)
         else:
             return handle_deploy_lambda(config)
-    if args.get('lambda-invoke'):
-        name = args.get('--lambda-name')
-        payload = args.get('--payload', None)
+    if command == 'lambda-invoke':
+        name = args.get('lambda_name')
+        payload = args.get('payload', None)
         return handle_invoke_lambda(name, payload)
-    if args.get('lambda-delete'):
-        name = args.get('--lambda-name')
+    if command == 'lambda-delete':
+        name = args.get('lambda_name')
         return handle_delete_lambda(name)
-    if args.get('lambda-archive'):
+    if command == 'lambda-archive':
         return handle_lambda_archive(config)
 
     error('Unrecognized command.')
