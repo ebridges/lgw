@@ -62,7 +62,7 @@ def build_lambda_archive(
 
     info('Running docker image to build lambda archive.')
     client = docker.from_env()
-    container = client.containers.run(tag, command=f'/bin/sh', detach=True)
+    container = client.containers.run(tag, command='/bin/sh', detach=True)
 
     info('Extracting lambda archive from running container.')
     bits, _ = container.get_archive(f'{DEFAULT_OUTPUT_DIR}/{lambda_archive_filename}')
@@ -182,7 +182,6 @@ def create_docker_context(dockerfile, context_directory, context_file):
                 debug(f'>    {tinfo}')
 
 
-
 def print_progress(line):
     s = line.decode('utf8')
     if s:
@@ -190,7 +189,7 @@ def print_progress(line):
             if l.strip():
                 try:
                     dd = ast.literal_eval(l.strip())
-                except:
+                except Exception:
                     warning(l)
                 else:
                     if 'stream' in dd:
