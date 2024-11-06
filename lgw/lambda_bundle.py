@@ -9,11 +9,25 @@ from os.path import exists
 
 from logging import debug, info, warning, error, getLogger, DEBUG
 
+PYTHON_VERSION = '3.12'
+ARCH = '-arm64'
+BASE_IMAGE = f'public.ecr.aws/shogo82148/lambda-python:build-{PYTHON_VERSION}.2024.10.18{ARCH}'
 DOCKER_SOCKET_FILE = '/var/run/docker.sock'
 DEFAULT_CODE_HOME = '/home/code/'
 DEFAULT_VENV_HOME = '/home/venv/'
 DEFAULT_OUTPUT_DIR = '/home/build/'
-DEFAULT_PACKAGES = ['gcc', 'openssl-devel', 'bzip2-devel', 'libffi-devel', 'python312-pip']
+DEFAULT_PACKAGES = ['python-pip']
+LAMBDA_BUNDLE_ZIP = 'lambda-bundle.zip'
+ZIP_EXCLUDES = [
+    '*/bin',
+    '*dist-info*',
+    '*__pycache__*',
+    '*.pyc',
+    '*easy_install.py*',
+    '*pip/*',
+    '*setuptools/*',
+    '*pkg_resources/*',
+]
 
 DEFAULT_DOCKERIGNORE = [
     '**/.DS_Store',
@@ -39,7 +53,7 @@ def build_lambda_archive(
     lambda_archive_dir,
     lambda_archive_filename,
     addl_project_files=[],
-    addl_yum_packages=[],
+    addl_system_packages=[],
 ):
     if not exists(DOCKER_SOCKET_FILE):
         error(f'Docker listen socket not found at {DOCKER_SOCKET_FILE}')
@@ -48,7 +62,9 @@ def build_lambda_archive(
         )
 
     info('Assembling Dockerfile.')
-    dockerfile = create_dockerfile(lambda_archive_filename, addl_project_files, addl_yum_packages)
+    dockerfile = create_dockerfile(
+        lambda_archive_filename, addl_project_files, addl_system_packages
+    )
     debug(dockerfile)
 
     tag = 'lambda-bundle:latest'
@@ -73,58 +89,44 @@ def build_lambda_archive(
     return location
 
 
-def create_dockerfile(archive_filename, addl_project_files, addl_yum_packages):
-    yum_packages = ' '.join(set(DEFAULT_PACKAGES + addl_yum_packages))
+def create_dockerfile(archive_filename, addl_project_files, addl_system_packages):
+    sys_packages = ' '.join(set(DEFAULT_PACKAGES + addl_system_packages))
+    zip_excludes = ' '.join(set(ZIP_EXCLUDES))
     addl_files = ''
     for files in addl_project_files:
-        addl_files += 'COPY %s %s\n' % files
+        # addl_project_files is a list of tuples
+        addl_files += 'COPY %s %s' % files
 
-    dockerfile = f'''
-FROM lambci/lambda:build-python3.12 AS base
-
-RUN yum makecache fast
-
-RUN yum clean all && \
-  yum update --assumeyes && \
-  yum upgrade --assumeyes
-
-RUN yum install  --assumeyes \
-  {yum_packages}
-
+    dockerfile = f'''FROM {BASE_IMAGE} AS base
+# Switch to root user to perform installations
+USER root
+# Set ARGs for directories
 ARG wkdir={DEFAULT_CODE_HOME}
-RUN mkdir -p $wkdir
-
 ARG venv={DEFAULT_VENV_HOME}
-RUN mkdir -p $venv
-
 ARG output={DEFAULT_OUTPUT_DIR}
-RUN mkdir -p $output
-
+# Install system dependencies
+RUN microdnf install -y \
+    {sys_packages}
+# Create working directories & change to working dir
+RUN mkdir -p $wkdir $venv $output
 WORKDIR $wkdir
-
 {addl_files}
-
-RUN python3 -m venv $venv
-RUN source $venv/bin/activate && \
-    pip3 install -U pip && \
-    pip3 install -r requirements.txt
-
-RUN echo "source $venv/bin/activate" > $HOME/.profile
-
+# Set up virtual environment and install dependencies
+COPY requirements.txt ./
+RUN python3 -m venv $venv && \
+ source $venv/bin/activate && \
+ pip install -U pip && \
+ pip install -r requirements.txt && \
+ deactivate
+# Activate virtual env on login
+RUN echo "source $venv/bin/activate" >> $HOME/.profile
+# Package the code and dependencies into the output zip in one RUN command
 RUN cd $wkdir && \
-    zip -9 -r \
-    $output/{archive_filename} . \
-    --exclude '*/bin' '*dist-info*' '*__pycache__*' \
-        '*.pyc' '*easy_install.py*' '*pip/*' \
-            '*setuptools/*' '*pkg_resources/*'
-
-RUN cd $venv/lib/python3.7/site-packages && \
-    zip -9 -r -u \
-    $output/{archive_filename} . \
-    --exclude '*/bin' '*dist-info*' '*__pycache__*' \
-        '*.pyc' '*easy_install.py*' '*pip/*' \
-            '*setuptools/*' '*pkg_resources/*'
-
+zip -9 -r $output/{archive_filename} . \
+ --exclude {zip_excludes} && \
+cd $venv/lib/python{PYTHON_VERSION}/site-packages && \
+zip -9 -r -u $output/{archive_filename} . \
+ --exclude {zip_excludes}
 '''
 
     return dockerfile
