@@ -89,13 +89,13 @@ def test_lambda_archive():
 @pytest.mark.parametrize(
     "test_args, handler_function, config_args",
     [
-         ({"command": "gw-deploy"}, "lgw.main.handle_deploy_api_gateway", [MagicMock()]),
-         ({"command": "gw-undeploy"}, "lgw.main.handle_undeploy_api_gateway", [MagicMock()]),
-         ({"command": "domain-add"}, "lgw.main.handle_add_domain",[MagicMock()]),
-         ({"command": "domain-remove"}, "lgw.main.handle_remove_domain", [MagicMock()]),
-         ({"command": "lambda-archive"}, "lgw.main.handle_lambda_archive", [MagicMock()]),
-         ({"command": "lambda-deploy"}, "lgw.main.handle_deploy_lambda", [MagicMock()]),
-    ]
+        ({"command": "gw-deploy"}, "lgw.main.handle_deploy_api_gateway", [MagicMock()]),
+        ({"command": "gw-undeploy"}, "lgw.main.handle_undeploy_api_gateway", [MagicMock()]),
+        ({"command": "domain-add"}, "lgw.main.handle_add_domain", [MagicMock()]),
+        ({"command": "domain-remove"}, "lgw.main.handle_remove_domain", [MagicMock()]),
+        ({"command": "lambda-archive"}, "lgw.main.handle_lambda_archive", [MagicMock()]),
+        ({"command": "lambda-deploy"}, "lgw.main.handle_deploy_lambda", [MagicMock()]),
+    ],
 )
 def test_command_routing(test_args, handler_function, config_args):
     config = config_args[0]
@@ -116,11 +116,12 @@ def test_command_routing(test_args, handler_function, config_args):
 @pytest.mark.parametrize(
     "test_args, handler_function, config_args",
     [
-         (
-             {"command": "lambda-deploy", "lambda_file": "/path/to/lambda.zip"},
-             "lgw.main.handle_deploy_lambda",
-             [MagicMock(), "/path/to/lambda.zip"]),
-    ]
+        (
+            {"command": "lambda-deploy", "lambda_file": "/path/to/lambda.zip"},
+            "lgw.main.handle_deploy_lambda",
+            [MagicMock(), "/path/to/lambda.zip"],
+        ),
+    ],
 )
 def test_command_routing_with_config_plus_params(test_args, handler_function, config_args):
     config = config_args[0]
@@ -139,14 +140,14 @@ def test_command_routing_with_config_plus_params(test_args, handler_function, co
         (
             {"command": "lambda-invoke", "lambda_name": "myLambda", "payload": "data.json"},
             "lgw.main.handle_invoke_lambda",
-            ("myLambda", "data.json")
+            ("myLambda", "data.json"),
         ),
         (
             {"command": "lambda-delete", "lambda_name": "myLambda"},
             "lgw.main.handle_delete_lambda",
             ("myLambda",),
         ),
-    ]
+    ],
 )
 def test_command_routing_without_config(test_args, handler_function, expected_args):
     with patch(handler_function) as patched_handler:
@@ -155,5 +156,3 @@ def test_command_routing_without_config(test_args, handler_function, expected_ar
 
         # Check the correct handler was called
         patched_handler.assert_called_once_with(*expected_args)
-
-
