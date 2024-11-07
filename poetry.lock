@@ -80,8 +80,6 @@ mypy-extensions = ">=0.4.3"
 packaging = ">=22.0"
 pathspec = ">=0.9.0"
 platformdirs = ">=2"
-tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
-typing-extensions = {version = ">=4.0.1", markers = "python_version < \"3.11\""}
 
 [package.extras]
 colorama = ["colorama (>=0.4.3)"]
@@ -122,10 +120,7 @@ files = [
 [package.dependencies]
 jmespath = ">=0.7.1,<2.0.0"
 python-dateutil = ">=2.1,<3.0.0"
-urllib3 = [
-    {version = ">=1.25.4,<1.27", markers = "python_version < \"3.10\""},
-    {version = ">=1.25.4,<2.2.0 || >2.2.0,<3", markers = "python_version >= \"3.10\""},
-]
+urllib3 = {version = ">=1.25.4,<2.2.0 || >2.2.0,<3", markers = "python_version >= \"3.10\""}
 
 [package.extras]
 crt = ["awscrt (==0.22.0)"]
@@ -466,20 +461,6 @@ files = [
 [package.extras]
 ini = ["configobj"]
 yaml = ["PyYAML"]
-
-[[package]]
-name = "exceptiongroup"
-version = "1.2.2"
-description = "Backport of PEP 654 (exception groups)"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "exceptiongroup-1.2.2-py3-none-any.whl", hash = "sha256:3111b9d131c238bec2f8f516e123e14ba243563fb135d3fe885990585aa7795b"},
-    {file = "exceptiongroup-1.2.2.tar.gz", hash = "sha256:47c2edf7c6738fafb49fd34290706d1a1a2f4d1c6df275526b62cbb4aa5393cc"},
-]
-
-[package.extras]
-test = ["pytest (>=6)"]
 
 [[package]]
 name = "filelock"
@@ -962,11 +943,9 @@ files = [
 
 [package.dependencies]
 colorama = {version = "*", markers = "sys_platform == \"win32\""}
-exceptiongroup = {version = ">=1.0.0rc8", markers = "python_version < \"3.11\""}
 iniconfig = "*"
 packaging = "*"
 pluggy = ">=1.5,<2"
-tomli = {version = ">=1", markers = "python_version < \"3.11\""}
 
 [package.extras]
 dev = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "pygments (>=2.7.2)", "requests", "setuptools", "xmlschema"]
@@ -1286,20 +1265,13 @@ files = [
 
 [[package]]
 name = "tld"
-version = "0.12.7"
+version = "0.13"
 description = "Extract the top-level domain (TLD) from the URL given."
 optional = false
-python-versions = ">=2.7, <4"
+python-versions = ">=3.7, <4"
 files = [
-    {file = "tld-0.12.7-py27-none-any.whl", hash = "sha256:d1130e050e1de92b24928246d36847dadb8106fd9455f1903f2712d23ed654f3"},
-    {file = "tld-0.12.7-py310-none-any.whl", hash = "sha256:728083653341819d7c1a76e3aaeb6bfc4bafebfaa3336384762a998320f14d1e"},
-    {file = "tld-0.12.7-py311-none-any.whl", hash = "sha256:7e3d4c856c0d62484117f527f278bb5583849d71961d4fd062bcac0773b0984c"},
-    {file = "tld-0.12.7-py35-none-any.whl", hash = "sha256:da090e9a8706fa9107e451162c31f391c082b30c60b3f1afe94811daf559b0ae"},
-    {file = "tld-0.12.7-py36-none-any.whl", hash = "sha256:982e1e35895e32b04777eba704d26d9aeb7cc31d10efc69466a346fac295d7aa"},
-    {file = "tld-0.12.7-py37-none-any.whl", hash = "sha256:f8efb8d883398aa9ada8995a5a13f8e8d8e6694696dc7dda3e37dc7170b625e4"},
-    {file = "tld-0.12.7-py38-none-any.whl", hash = "sha256:d16d2475383f0a78bc4faa2fa2c23417fe494d9b73081a0670dc4a1e5a32fba8"},
-    {file = "tld-0.12.7-py39-none-any.whl", hash = "sha256:2157f36502c88e538c73e991fffbd2fb905fb8d87bbeef0feb7b24b03335c180"},
-    {file = "tld-0.12.7.tar.gz", hash = "sha256:b6f7729e19ce0ebc77ba0a65b70d6213aeb952c01ff605e1299aae5fb7621c5e"},
+    {file = "tld-0.13-py2.py3-none-any.whl", hash = "sha256:f75b2be080f767ed17c2338a339eaa4fab5792586319ca819119da252f9f3749"},
+    {file = "tld-0.13.tar.gz", hash = "sha256:93dde5e1c04bdf1844976eae440706379d21f4ab235b73c05d7483e074fb5629"},
 ]
 
 [[package]]
@@ -1312,44 +1284,6 @@ files = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
     {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
 ]
-
-[[package]]
-name = "tomli"
-version = "2.0.2"
-description = "A lil' TOML parser"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "tomli-2.0.2-py3-none-any.whl", hash = "sha256:2ebe24485c53d303f690b0ec092806a085f07af5a5aa1464f3931eec36caaa38"},
-    {file = "tomli-2.0.2.tar.gz", hash = "sha256:d46d457a85337051c36524bc5349dd91b1877838e2979ac5ced3e710ed8a60ed"},
-]
-
-[[package]]
-name = "typing-extensions"
-version = "4.12.2"
-description = "Backported and Experimental Type Hints for Python 3.8+"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "typing_extensions-4.12.2-py3-none-any.whl", hash = "sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d"},
-    {file = "typing_extensions-4.12.2.tar.gz", hash = "sha256:1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8"},
-]
-
-[[package]]
-name = "urllib3"
-version = "1.26.20"
-description = "HTTP library with thread-safe connection pooling, file post, and more."
-optional = false
-python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
-files = [
-    {file = "urllib3-1.26.20-py2.py3-none-any.whl", hash = "sha256:0ed14ccfbf1c30a9072c7ca157e4319b70d65f623e91e7b32fadb2853431016e"},
-    {file = "urllib3-1.26.20.tar.gz", hash = "sha256:40c2dc0c681e47eb8f90e7e27bf6ff7df2e677421fd46756da1161c39ca70d32"},
-]
-
-[package.extras]
-brotli = ["brotli (==1.0.9)", "brotli (>=1.0.9)", "brotlicffi (>=0.8.0)", "brotlipy (>=0.6.0)"]
-secure = ["certifi", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "ipaddress", "pyOpenSSL (>=0.14)", "urllib3-secure-extra"]
-socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "urllib3"
@@ -1418,5 +1352,5 @@ files = [
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.9,<3.13"
-content-hash = "762f3af2f71f10c78a32362fbb7e251a48bdb0b939d4180da3c1327e3828f647"
+python-versions = ">=3.12,<4"
+content-hash = "e0b1e7d3319561622d49a1b19a5ccb13eb7ded462de7091320a7810f047350c8"
