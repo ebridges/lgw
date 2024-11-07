@@ -48,7 +48,9 @@ def create_mock_api_gateway(api_client):
     api_name = 'mock_api_name'
     api_description = 'mock_api_description'
     binary_types = ['image/jpeg']
-    api_id = create_api_gateway(api_client, api_name, api_description=api_description, binary_types=binary_types)
+    api_id = create_api_gateway(
+        api_client, api_name, api_description=api_description, binary_types=binary_types
+    )
     info('api_id [%s]' % api_id)
     return api_id
 
