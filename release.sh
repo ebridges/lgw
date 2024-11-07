@@ -20,7 +20,7 @@ if [ "$key" = '' ]; then
     exit 1
   fi
 
-  result=`emacs pyproject.toml lgw/version.py`
+  result=`emacs pyproject.toml lgw/version.py tests/test_lgw.py`
 
   if [ ${result} ];
   then
@@ -28,9 +28,9 @@ if [ "$key" = '' ]; then
     exit 1
   fi
 
-  git add pyproject.toml lgw/version.py
+  git add pyproject.toml lgw/version.py tests/test_lgw.py
   if [ $? -ne 0 ]; then
-    echo "Error adding pyproject.toml and lgw/version.py"
+    echo "Error adding pyproject.toml, lgw/version.py and tests/test_lgw.py"
     exit 1
   fi
 

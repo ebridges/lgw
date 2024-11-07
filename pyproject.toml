@@ -11,12 +11,12 @@ classifiers = ["Topic :: Software Development :: Build Tools"]
 exclude = ["tests", "vscode.env", "NOTES.md"]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.13"
+python = ">=3.12,<4"
 everett = "^1.0"
 boto3 = "^1.35"
 docker = "^7.1.0"
 python-dotenv = "^1"
-tld = "^0.12.1"
+tld = "^0.13"
 moto = {version = "^5.0.7", extras = ["lambda", "apigateway"]}
 
 [tool.poetry.dev-dependencies]
