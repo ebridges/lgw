@@ -1,35 +1,13 @@
-'''
-Lambda Gateway.
-
-Usage:
-  lgw gw-deploy [--verbose] [--config-file=<cfg>]
-  lgw gw-undeploy [--verbose] [--config-file=<cfg>]
-  lgw domain-add [--verbose] [--config-file=<cfg>]
-  lgw domain-remove [--verbose] [--config-file=<cfg>]
-  lgw lambda-deploy [--verbose] [--config-file=<cfg>] [--lambda-file=<zip>]
-  lgw lambda-invoke [--verbose] --lambda-name=<name> [--payload=<json>]
-  lgw lambda-delete [--verbose] --lambda-name=<name>
-  lgw lambda-archive [--verbose] [--config-file=<cfg>]
-
-Options:
-  -h --help             Show this screen.
-  --version             Show version.
-  --verbose             Enable DEBUG-level logging.
-  --config-file=<cfg>   Override defaults with these settings.
-  --lambda-file=<zip>   Path to zip file with executable lambda code.
-  --lambda-name=<name>  Name of the lambda to invoke or delete.
-  --payload=<json>      Path to a file of type json with data to send with the lambda invocation.
-'''
-
 from os import path, makedirs
 from sys import argv
 import json
 from logging import info, debug, error
 from everett.manager import ConfigManager, ConfigOSEnv, ConfigDictEnv
-from docopt import docopt
 from dotenv import dotenv_values, find_dotenv
+
+from lgw import parse_args
+
 from lgw.util import configure_logging
-from lgw.version import __version__
 from lgw import settings
 from lgw.api_gateway import create_rest_api, delete_rest_api
 from lgw.api_gateway_domain import add_domain_mapping, remove_domain_mapping
@@ -38,11 +16,7 @@ from lgw.lambda_bundle import build_lambda_archive
 from lgw.settings import dump
 
 
-def handle_deploy_lambda(config):
-    return handle_deploy_lambda(None, config)
-
-
-def handle_deploy_lambda(file, config):
+def handle_deploy_lambda(config, file=None):
     if file:
         info(f'handle_deploy_lambda() called with file [{file}]')
     else:
@@ -80,7 +54,7 @@ def handle_deploy_lambda(file, config):
 
 
 def handle_lambda_archive(config):
-    info(f'handle_lambda_archive() called.')
+    info('handle_lambda_archive() called.')
     addl_files = []
     if config('aws_lambda_archive_addl_files'):
         addl_files = [
@@ -193,32 +167,37 @@ def handle_remove_domain(config):
 
 
 def app(args, config):
-    if args.get('gw-deploy'):
+    command = args.get('command')
+
+    if not command:
+        raise ValueError('No command provided.')
+
+    if command == 'gw-deploy':
         return handle_deploy_api_gateway(config)
-    if args.get('gw-undeploy'):
+    if command == 'gw-undeploy':
         return handle_undeploy_api_gateway(config)
-    if args.get('domain-add'):
+    if command == 'domain-add':
         return handle_add_domain(config)
-    if args.get('domain-remove'):
+    if command == 'domain-remove':
         return handle_remove_domain(config)
-    if args.get('lambda-deploy'):
-        file_arg = args.get('--lambda-file')
+    if command == 'lambda-deploy':
+        file_arg = args.get('lambda_file')
         if file_arg:
             file = path.abspath(file_arg)
-            return handle_deploy_lambda(file, config)
+            return handle_deploy_lambda(config, file)
         else:
             return handle_deploy_lambda(config)
-    if args.get('lambda-invoke'):
-        name = args.get('--lambda-name')
-        payload = args.get('--payload', None)
+    if command == 'lambda-invoke':
+        name = args.get('lambda_name')
+        payload = args.get('payload', None)
         return handle_invoke_lambda(name, payload)
-    if args.get('lambda-delete'):
-        name = args.get('--lambda-name')
+    if command == 'lambda-delete':
+        name = args.get('lambda_name')
         return handle_delete_lambda(name)
-    if args.get('lambda-archive'):
+    if command == 'lambda-archive':
         return handle_lambda_archive(config)
 
-    error('Unrecognized command.')
+    error(f'Unrecognized command: {command}')
 
 
 def load_config(config_file):
@@ -245,7 +224,8 @@ def load_config(config_file):
 
 
 def main():
-    args = docopt(__doc__, version=__version__)
+    args = parse_args()
+
     configure_logging(args.get('--verbose'))
     config_file = args.get('--config-file', None)
     if config_file:
@@ -253,7 +233,7 @@ def main():
 
     config = load_config(config_file)
     if args.get('--verbose'):
-        debug(f'All config values:')
+        debug('All config values:')
         dump(config)
 
     app(args, config)
