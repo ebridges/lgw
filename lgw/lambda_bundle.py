@@ -105,8 +105,8 @@ ARG wkdir={DEFAULT_CODE_HOME}
 ARG venv={DEFAULT_VENV_HOME}
 ARG output={DEFAULT_OUTPUT_DIR}
 # Install system dependencies
-RUN dnf install -y \
-    {sys_packages}
+# RUN dnf install -y \
+#     {sys_packages}
 # Create working directories & change to working dir
 RUN mkdir -p $wkdir $venv $output
 WORKDIR $wkdir
