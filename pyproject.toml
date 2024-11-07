@@ -13,7 +13,7 @@ exclude = ["tests", "vscode.env", "NOTES.md"]
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
 everett = "^1.0"
-boto3 = "^1.10"
+boto3 = "^1.35"
 docker = "^7.1.0"
 python-dotenv = "^1"
 tld = "^0.12.1"
