@@ -168,6 +168,10 @@ def handle_remove_domain(config):
 
 def app(args, config):
     command = args.get('command')
+
+    if not command:
+        raise ValueError('No command provided.')
+
     if command == 'gw-deploy':
         return handle_deploy_api_gateway(config)
     if command == 'gw-undeploy':
@@ -193,7 +197,7 @@ def app(args, config):
     if command == 'lambda-archive':
         return handle_lambda_archive(config)
 
-    error('Unrecognized command.')
+    error(f'Unrecognized command: {command}')
 
 
 def load_config(config_file):
